@@ -1,0 +1,110 @@
+/* Home.css */
+
+.home-container {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  padding: 0;
+  margin: 0;
+}
+
+.hero-section {
+  text-align: center;
+  background-color: #5A67D8; /* Soft Blue for a Professional Look */
+  color: white;
+  padding: 80px 20px;
+}
+
+.cta-buttons {
+  margin-top: 30px;
+}
+
+.cta-buttons .btn {
+  text-decoration: none;
+  padding: 12px 24px;
+  margin: 0 10px;
+  border-radius: 25px;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #48BB78; /* Soft Green for Positive Action */
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #38A169;
+}
+
+.btn-secondary {
+  background-color: #2B6CB0; /* Darker Blue for Secondary Action */
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #2C5282;
+}
+
+.about-section,
+.features-section,
+.call-to-action-section {
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.about-section {
+  background-color: #F7FAFC; /* Light Gray for Contrast */
+}
+
+.features-section {
+  background-color: #EDF2F7; /* Even Lighter Gray for Features */
+}
+
+.features-grid {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.feature-item {
+  width: 28%;
+  margin: 20px;
+  padding: 30px;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Soft Shadow for Elevation */
+  transition: transform 0.3s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-5px); /* Slight Lift on Hover */
+}
+
+.feature-item h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #2D3748; /* Darker Gray */
+}
+
+.feature-item p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #4A5568; /* Medium Gray for Text */
+}
+
+.call-to-action-section {
+  background-color: #5A67D8; /* Matching Hero Section */
+  color: white;
+}
+
+.call-to-action-section .btn {
+  padding: 15px 35px;
+  margin-top: 20px;
+  font-size: 18px;
+  background-color: #48BB78;
+  border-radius: 30px;
+}
+
+.call-to-action-section .btn:hover {
+  background-color: #38A169;
+}

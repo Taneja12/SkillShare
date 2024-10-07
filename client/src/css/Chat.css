@@ -1,0 +1,64 @@
+.chat-container {
+  max-width: 600px;
+  margin: auto;
+}
+
+.chat-box {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.chat-message {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.my-message {
+  justify-content: flex-end;
+}
+
+.other-message {
+  justify-content: flex-start;
+}
+
+.chat-bubble {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  position: relative;
+  font-size: 14px;
+}
+
+.my-message .chat-bubble {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+}
+
+.other-message .chat-bubble {
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.unread-message {
+  font-weight: bold;
+}
+
+.message-status {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 12px;
+  color: #999;
+}
+
+.tick-icon {
+  margin-left: 5px;
+}
+
+.tick-icon.unread {
+  color: #999;
+}
+
+.tick-icon.read {
+  color: #4fc3f7;
+}
