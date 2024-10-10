@@ -35,7 +35,7 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <li className="nav-item">
-                  <Link to={`/profile/${currentUser}`} className="nav-link">Profile</Link> {/* Dynamic Profile Link */}
+                  <Link to={`/profile/${currentUser?.userId}`} className="nav-link">Profile</Link> {/* Use userId or appropriate identifier */}
                 </li>
                 <li className="nav-item">
                   <Link to="/dashboard" className="nav-link">Dashboard</Link>

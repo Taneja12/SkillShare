@@ -42,10 +42,21 @@ export const loginUser = async (formData) => {
 // Fetch chat history
 export const getChatHistory = async (currentUserId, userId) => {
   try {
+    console.log(userId);
     const response = await axios.get(`${API_URL}/chat/history/${currentUserId}/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching chat history:', error);
+    throw error;
+  }
+};
+
+export const fetchUserDetails = async (userId) => {
+  try {
+    const response = await axios.get(`${API_URL}/users/${userId}`);
+    return response.data; // Should contain currentUser (including profile picture) and matchedUsers
+  } catch (error) {
+    console.error('Error fetching user details:', error);
     throw error;
   }
 };
@@ -65,9 +76,31 @@ export const sendMessage = async (messageData) => {
 export const fetchMatchedUsers = async (userId) => {
   try {
     const response = await axios.get(`${API_URL}/match/${userId}`);
+    console.log(response);
     return response.data;
   } catch (error) {
     console.error('Error fetching matched users:', error);
+    throw error;
+  }
+};
+
+export const uploadProfilePicture = async (file, userId) => {
+  const formData = new FormData();
+  formData.append('image', file); // File upload using key 'image'
+  formData.append('userId', userId); // Send userId along with the image
+
+  try {
+    const response = await fetch(`${API_URL}/upload/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Error uploading image');
+    }
+    return result;
+  } catch (error) {
     throw error;
   }
 };

@@ -8,9 +8,13 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const requestRoutes = require('./routes/requestRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 const Message = require('./models/Message');
 const User = require('./models/User');
+const cloudinary = require('./cloudinaryConfig'); // Make sure the path is correct
 require('dotenv').config();
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 const app = express();
 const server = http.createServer(app);
@@ -39,6 +43,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/request', requestRoutes);
+app.use('/api/upload', uploadRoutes); 
 
 // Socket.IO Logic
 io.on('connection', (socket) => {
@@ -89,6 +94,7 @@ io.on('connection', (socket) => {
         console.log('User disconnected:', socket.id);
     });
 });
+
 
 // Start the server
 const PORT = process.env.PORT || 5000;
