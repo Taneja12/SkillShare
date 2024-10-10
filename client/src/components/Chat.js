@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../Contexts/AuthContext';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/Chat.css';
+import { getChatHistory } from '../services/api'; // Import the refactored API function
 
 // Initialize Socket.IO client
 const socket = io('http://localhost:5000');
@@ -21,8 +21,8 @@ const Chat = () => {
         const fetchMessages = async () => {
             if (currentUser && userId) {
                 try {
-                    const response = await axios.get(`http://localhost:5000/api/chat/history/${currentUser.userId}/${userId}`);
-                    setMessages(response.data);
+                    const chatHistory = await getChatHistory(currentUser.userId, userId);
+                    setMessages(chatHistory);
                 } catch (error) {
                     console.error('Error fetching chat history:', error);
                 } finally {
@@ -34,9 +34,8 @@ const Chat = () => {
         fetchMessages();
 
         if (currentUser) {
-            // Emit joinRoom event when the user joins the chat
             socket.emit('joinRoom', currentUser.userId);
-            console.log('User joined room:', currentUser.userId);
+            // console.log('User joined room:', currentUser.userId);
 
             // Real-time messages
             socket.on('messageReceived', (message) => {
@@ -51,7 +50,7 @@ const Chat = () => {
         }
     }, [userId, currentUser]);
 
-    const handleSendMessage = async (e) => {
+    const handleSendMessage = (e) => {
         e.preventDefault();
         if (!messageContent.trim()) return;
 
@@ -62,12 +61,8 @@ const Chat = () => {
             timestamp: new Date(),
         };
 
-        try {
-            socket.emit('sendMessage', newMessage);
-            setMessageContent(''); // Clear input field after sending
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
+        socket.emit('sendMessage', newMessage);
+        setMessageContent('');
     };
 
     useEffect(() => {

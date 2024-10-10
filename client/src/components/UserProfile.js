@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../Contexts/AuthContext';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../css/UserProfle.css'; // Your custom CSS
 import { Spinner } from 'react-bootstrap'; // Optional: Add Bootstrap spinner
+import '../css/UserProfle.css'; // Your custom CSS
+import { fetchMatchedUsers } from '../services/api'; // Import API function
 
 const UserProfile = () => {
   const { currentUser } = useAuth(); // Get the currentUser from AuthContext
@@ -18,12 +18,11 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       if (currentUser && currentUser.userId) {
         try {
-          const response = await axios.get(`http://localhost:5000/api/match/${currentUser.userId}`);
-          console.log('API Response:', response.data); // Log API response for debugging
-          setMatchedUsers(response.data.matchedUsers); // Directly set matched users
-          setCurrentUserDetails(response.data.currentUser); // Set current user details
+          const data = await fetchMatchedUsers(currentUser.userId);
+          setMatchedUsers(data.matchedUsers); // Directly set matched users
+          setCurrentUserDetails(data.currentUser); // Set current user details
         } catch (error) {
-          console.error('Error fetching matched users:', error);
+          console.error('Error fetching matched users:', error); // Keep error logging
           setError('Unable to load user data. Please try again later.');
         } finally {
           setLoading(false); // Stop loading when request is done
@@ -36,38 +35,52 @@ const UserProfile = () => {
     fetchUserData();
   }, [currentUser]);
 
-  // Function to render skills with elaboration
-  const renderSkills = (skills, title) => (
-    <>
-      <h6>{title}:</h6>
-      {Array.isArray(skills) && skills.length > 0 ? (
-        <ul>
-          {skills.map((skillObj, index) => (
-            <li key={index}>
-              <strong>{skillObj.skill}</strong> - {skillObj.elaboration || 'No elaboration provided'}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No skills available</p>
-      )}
-    </>
+  // Memoize skills rendering for optimization
+  const renderSkills = useCallback(
+    (skills, title) => (
+      <>
+        <h6>{title}:</h6>
+        {Array.isArray(skills) && skills.length > 0 ? (
+          <ul>
+            {skills.map((skillObj, index) => (
+              <li key={index}>
+                <strong>{skillObj.skill}</strong> - {skillObj.elaboration || 'No elaboration provided'}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No skills available</p>
+        )}
+      </>
+    ),
+    []
   );
 
-  // Handle message click
-  const handleMessageClick = (userId) => {
-    // Ensure userId is valid before navigating
-    if (userId) {
-      navigate(`/messages/${userId}`); // Navigate to the messages page
-    } else {
-      console.error('Invalid userId for messaging.');
-    }
-  };
+  // Handle message click with useCallback to avoid re-renders
+  const handleMessageClick = useCallback(
+    (userId) => {
+      if (userId) {
+        navigate(`/messages/${userId}`);
+      } else {
+        console.error('Invalid userId for messaging.');
+      }
+    },
+    [navigate]
+  );
+
+  // Handle send request click with useCallback to avoid re-renders
+  const handleSendRequestClick = useCallback(
+    (userId) => {
+      // Logic to handle sending a request to the user
+      console.log(`Request sent to user with ID: ${userId}`);
+      // You can later replace this with an actual API call to send the request
+    },
+    []
+  );
 
   if (loading) {
     return (
       <div className="text-center my-5">
-        {/* Loading Spinner */}
         <Spinner animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
@@ -85,37 +98,33 @@ const UserProfile = () => {
 
       <div className="user-info mb-4">
         <h5>User ID: {currentUser ? currentUser.userId : 'No user available'}</h5>
-        
-        {/* Skills to Teach and Learn */}
+
         {renderSkills(currentUserDetails.skillsToTeach, 'Skills to Teach')}
         {renderSkills(currentUserDetails.skillsToLearn, 'Skills to Learn')}
       </div>
 
       <h2 className="text-center my-4">Matched Users</h2>
-      
+
       {matchedUsers.length > 0 ? (
         <div className="user-list">
           {matchedUsers.map((user) => (
             <div className="user-card animate" key={user._id}>
               <h5 className="user-title">{user.username}</h5>
 
-              {/* Matched User Skills to Teach */}
               {renderSkills(user.skillsToTeach, 'Skills to Teach')}
-
-              {/* Matched User Skills to Learn */}
               {renderSkills(user.skillsToLearn, 'Skills to Learn')}
 
-              {/* User Interests and Description */}
               {user.interests && Array.isArray(user.interests) && user.interests.length > 0 && (
                 <p className="user-interests">Interests: {user.interests.join(', ')}</p>
               )}
               {user.description && <p className="user-description">Description: {user.description}</p>}
 
-              {/* Action Buttons */}
               <button className="btn btn-primary" onClick={() => handleMessageClick(user._id)}>
                 Message
               </button>
-              <button className="btn btn-secondary">Connect</button>
+              <button className="btn btn-secondary" onClick={() => handleSendRequestClick(user._id)}>
+                Send Request
+              </button>
             </div>
           ))}
         </div>

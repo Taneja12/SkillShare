@@ -7,46 +7,41 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true, // Remove whitespace
+    trim: true,
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true, // Normalize email for consistency
-    match: [/.+\@.+\..+/, 'Please fill a valid email address'], // Basic email validation
+    lowercase: true,
+    match: [/.+\@.+\..+/, 'Please fill a valid email address'],
   },
   password: {
     type: String,
     required: true,
-    // minlength: 6, // Minimum length for passwords
+    minlength: 6,
   },
-  skillsToTeach: {
-    type: [String],
-    default: [],
-  },
-  skillsToLearn: {
-    type: [String],
-    default: [],
-  },
-  skillsToTeach: [{ 
-    skill: { type: String, required: true }, 
-    elaboration: { type: String, required: true } 
+  skillsToTeach: [{
+    skill: { type: String, required: true },
+    elaboration: { type: String, required: true }
   }],
-  skillsToLearn: [{ 
-    skill: { type: String, required: true }, 
-    elaboration: { type: String, required: true } 
+  skillsToLearn: [{
+    skill: { type: String, required: true },
+    elaboration: { type: String, required: true }
   }],
   role: {
     type: String,
-    default: 'user', // Default role
+    default: 'user',
   },
   profilePicture: {
-    type: String, // URL or path to profile picture
+    type: String,
     default: null,
   },
+  connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  receivedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, {
-  timestamps: true, // Automatically manage createdAt and updatedAt fields
+  timestamps: true,
 });
 
 // Hash password before saving

@@ -7,6 +7,7 @@ const socketIo = require('socket.io');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const requestRoutes = require('./routes/requestRoutes');
 const Message = require('./models/Message');
 const User = require('./models/User');
 require('dotenv').config();
@@ -37,6 +38,7 @@ connectDB();
 app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/request', requestRoutes);
 
 // Socket.IO Logic
 io.on('connection', (socket) => {
@@ -45,7 +47,7 @@ io.on('connection', (socket) => {
     // Listen for 'joinRoom' to join a specific user room
     socket.on('joinRoom', (userId) => {
         socket.join(userId);
-        console.log(`User ${userId} joined room ${userId}`);
+        // console.log(`User ${userId} joined room ${userId}`);
     });
 
     // Handle sending messages

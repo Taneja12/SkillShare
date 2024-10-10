@@ -57,13 +57,20 @@ const Register = () => {
     }
     setError('');
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
+    setError(''); // Reset previous error
+    
     const { skillsDescription, skillsToTeach, skillsToLearn } = formData;
-
+  
+    // Check if there are any common skills between "Skills to Teach" and "Skills to Learn"
+    const commonSkills = skillsToTeach.filter(skill => skillsToLearn.includes(skill));
+    if (commonSkills.length > 0) {
+      setError('You cannot select the same skill for both teaching and learning');
+      return;
+    }
+  
     const formattedData = {
       ...formData,
       skillsToTeach: skillsToTeach.map(skill => ({
@@ -75,10 +82,10 @@ const Register = () => {
         elaboration: skillsDescription.learning || '',
       })),
     };
-
+  
     try {
       const response = await registerUser(formattedData);
-      const { token } = response; // Get the JWT token from the response
+      const { token } = response;
       if (token) {
         login(token); // Automatically login the user using the token
         alert('Registration successful');
@@ -87,16 +94,26 @@ const Register = () => {
         alert('Registration successful, but no token received.');
       }
     } catch (error) {
-      setError(error.response?.data?.error || 'Error in registration');
+      console.error('Registration error:', error);
+  
+      // Check if the error is from the backend
+      const errorMessage = error.message || 'Error in registration. Please try again.';
+      
+      // Set the error message to be displayed
+      setError(errorMessage); 
+  
+      // Log the detailed error message for debugging
+      console.error('Detailed error:', error.response?.data);
     }
   };
-
+  
+  
   const renderFormStep = () => {
     if (currentStep === 1) {
       return (
         <>
           {['username', 'email', 'password', 'confirmPassword'].map((field) => (
-            <div className="form-group mb-3" key={field}>
+            <div className="form-group mb-2" key={field}>
               <input
                 type={field.includes('password') ? 'password' : 'text'}
                 name={field}
@@ -108,7 +125,7 @@ const Register = () => {
               />
             </div>
           ))}
-          <button type="submit" className="btn btn-primary w-100">Next</button>
+          <button type="submit" className="btn btn-primary w-100 mt-2">Next</button>
         </>
       );
     }
@@ -116,8 +133,8 @@ const Register = () => {
     if (currentStep === 2) {
       return (
         <>
-          <div className="mb-3">
-            <label className="form-label">Select Broad Skill Categories You Can Teach:</label>
+          <div className="mb-2">
+            <label className="form-label">Skills You Can Teach:</label>
             <Select
               isMulti
               name="teachingCategories"
@@ -127,8 +144,8 @@ const Register = () => {
             />
           </div>
           {teachingCategories.length > 0 && (
-            <div className="mb-3">
-              <label className="form-label">Select Skills You Can Teach:</label>
+            <div className="mb-2">
+              <label className="form-label">Skills to Teach:</label>
               <Select
                 isMulti
                 name="skillsToTeach"
@@ -140,8 +157,8 @@ const Register = () => {
               />
             </div>
           )}
-          <div className="mb-3">
-            <label className="form-label">Select Broad Skill Category You Want to Learn:</label>
+          <div className="mb-2">
+            <label className="form-label">Skills You Want to Learn:</label>
             <Select
               name="learningCategory"
               options={skillCategories}
@@ -150,8 +167,8 @@ const Register = () => {
             />
           </div>
           {learningCategory && (
-            <div className="mb-3">
-              <label className="form-label">Select Skills You Want to Learn:</label>
+            <div className="mb-2">
+              <label className="form-label">Skills to Learn:</label>
               <Select
                 isMulti
                 name="skillsToLearn"
@@ -161,8 +178,8 @@ const Register = () => {
               />
             </div>
           )}
-          <div className="mb-3">
-            <label className="form-label">Elaborate on Your Teaching Skills:</label>
+          <div className="mb-2">
+            <label className="form-label">Teaching Skills Description:</label>
             <textarea
               name="teachingDescription"
               value={formData.skillsDescription.teaching}
@@ -171,11 +188,11 @@ const Register = () => {
                 skillsDescription: { ...prev.skillsDescription, teaching: e.target.value }
               }))}
               className="form-control"
-              placeholder="Elaborate on your teaching skills..."
+              placeholder="Describe your teaching skills"
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Elaborate on Your Learning Skills:</label>
+          <div className="mb-2">
+            <label className="form-label">Learning Skills Description:</label>
             <textarea
               name="learningDescription"
               value={formData.skillsDescription.learning}
@@ -184,17 +201,17 @@ const Register = () => {
                 skillsDescription: { ...prev.skillsDescription, learning: e.target.value }
               }))}
               className="form-control"
-              placeholder="Elaborate on your learning skills..."
+              placeholder="Describe your learning skills"
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100">Next</button>
+          <button type="submit" className="btn btn-primary w-100 mt-2">Next</button>
         </>
       );
     }
 
     return (
       <>
-        <h4>Skills to Teach:</h4>
+        <h5>Skills to Teach:</h5>
         {formData.skillsToTeach.length > 0 ? (
           <ul>
             {formData.skillsToTeach.map((skill, index) => <li key={index}>{skill}</li>)}
@@ -203,7 +220,7 @@ const Register = () => {
           <p>No skills selected.</p>
         )}
 
-        <h4>Skills to Learn:</h4>
+        <h5>Skills to Learn:</h5>
         {formData.skillsToLearn.length > 0 ? (
           <ul>
             {formData.skillsToLearn.map((skill, index) => <li key={index}>{skill}</li>)}
@@ -212,11 +229,7 @@ const Register = () => {
           <p>No skills selected.</p>
         )}
 
-        <h4>Skills Description:</h4>
-        <p>{formData.skillsDescription.teaching || 'No description provided for teaching.'}</p>
-        <p>{formData.skillsDescription.learning || 'No description provided for learning.'}</p>
-
-        <div className="d-flex justify-content-between">
+        <div className="d-flex justify-content-between mt-3">
           <button type="button" className="btn btn-secondary" onClick={() => setCurrentStep(2)}>Previous</button>
           <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Register</button>
         </div>
