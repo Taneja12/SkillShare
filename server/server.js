@@ -8,11 +8,11 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const requestRoutes = require('./routes/requestRoutes');
-const uploadRoutes = require('./routes/uploadRoutes');
+const uploadRoutes = require('./routes/uploadRoutes'); 
 const meetRoutes = require('./routes/meetRoutes');
 const Message = require('./models/Message');
 const User = require('./models/User');
-const cloudinary = require('./cloudinaryConfig'); // Make sure the path is correct
+const cloudinary = require('./cloudinaryConfig'); // Ensure the path is correct
 require('dotenv').config();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -20,21 +20,39 @@ const upload = multer({ dest: 'uploads/' });
 const app = express();
 const server = http.createServer(app);
 
+// Allowed origins for CORS
+const allowedOrigins = [
+    'http://localhost:3000',  // Local development URL
+    'https://frontend-weld-eta-50.vercel.app',  // Your Vercel frontend URL
+];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests without an origin (like mobile apps or Postman)
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT'],
+    credentials: true, // Allow credentials (important for cookies and auth)
+};
+
+// Use CORS middleware
+app.use(cors(corsOptions));
+
 // Initialize Socket.IO with proper CORS settings
 const io = socketIo(server, {
     cors: {
-        origin: 'https://frontend-weld-eta-50.vercel.app',
+        origin: allowedOrigins, // Use the allowed origins array for Socket.IO
         methods: ['GET', 'POST', 'PUT'], // Add 'PUT' here
         credentials: true,
     },
 });
+
 app.set('io', io);
 app.use(express.json());
-app.use(cors({
-    origin: 'https://frontend-weld-eta-50.vercel.app',
-    methods: ['GET', 'POST', 'PUT'], // Add 'PUT' here
-    credentials: true,
-}));
 
 // Connect to MongoDB
 connectDB();
@@ -54,7 +72,6 @@ io.on('connection', (socket) => {
     // Listen for 'joinRoom' to join a specific user room
     socket.on('joinRoom', (userId) => {
         socket.join(userId);
-        // console.log(User ${userId} joined room ${userId});
     });
 
     // Handle sending messages
@@ -96,7 +113,6 @@ io.on('connection', (socket) => {
         console.log('User disconnected:', socket.id);
     });
 });
-
 
 // Start the server
 const PORT = process.env.PORT || 5000;
