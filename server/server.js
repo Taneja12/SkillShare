@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const http = require('http');
-const mongoose = require('mongoose');
 const socketIo = require('socket.io');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -12,7 +11,6 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const meetRoutes = require('./routes/meetRoutes');
 const Message = require('./models/Message');
 const User = require('./models/User');
-const cloudinary = require('./cloudinaryConfig');
 require('dotenv').config();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -40,10 +38,15 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.options('*', cors(corsOptions));
 
 // Initialize Socket.IO with proper CORS settings
 const io = socketIo(server, {
-    cors: corsOptions,
+    cors: {
+        origin: allowedOrigins,
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
 });
 app.set('io', io);
 
