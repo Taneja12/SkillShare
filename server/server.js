@@ -23,7 +23,7 @@ const server = http.createServer(app);
 // CORS Configuration
 const allowedOrigins = [
     'http://localhost:3000',
-    'https://frontend-weld-eta-50.vercel.app',
+    'https://skill-share-deepanshu-tanejas-projects.vercel.app',
 ];
 
 const corsOptions = {
