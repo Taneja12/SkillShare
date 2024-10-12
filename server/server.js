@@ -12,7 +12,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const meetRoutes = require('./routes/meetRoutes');
 const Message = require('./models/Message');
 const User = require('./models/User');
-const cloudinary = require('./cloudinaryConfig'); // Make sure the path is correct
+const cloudinary = require('./cloudinaryConfig');
 require('dotenv').config();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -20,10 +20,21 @@ const upload = multer({ dest: 'uploads/' });
 const app = express();
 const server = http.createServer(app);
 
-// CORS configuration
+// CORS Configuration
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://frontend-weld-eta-50.vercel.app',
+];
+
 const corsOptions = {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT'],
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 };
 
@@ -51,12 +62,10 @@ app.use('/api/meet', meetRoutes);
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    // Listen for 'joinRoom' to join a specific user room
     socket.on('joinRoom', (userId) => {
         socket.join(userId);
     });
 
-    // Handle sending messages
     socket.on('sendMessage', async (message) => {
         try {
             let senderUsername = message.senderUsername || (await getSenderUsername(message.sender));
@@ -64,11 +73,10 @@ io.on('connection', (socket) => {
             const newMessage = new Message({
                 ...message,
                 senderUsername,
-                read: false // Set initial read status to false
+                read: false
             });
             await newMessage.save();
 
-            // Emit the message to the receiver's room
             io.to(message.receiver).emit('messageReceived', {
                 ...message,
                 senderUsername,
