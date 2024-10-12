@@ -20,21 +20,21 @@ const upload = multer({ dest: 'uploads/' });
 const app = express();
 const server = http.createServer(app);
 
+// CORS configuration
+const corsOptions = {
+    origin: 'https://frontend-weld-eta-50.vercel.app',
+    methods: ['GET', 'POST', 'PUT'],
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
 // Initialize Socket.IO with proper CORS settings
 const io = socketIo(server, {
-    cors: {
-        origin: 'https://frontend-weld-eta-50.vercel.app',
-        methods: ['GET', 'POST', 'PUT'], // Add 'PUT' here
-        credentials: true,
-    },
+    cors: corsOptions,
 });
 app.set('io', io);
-app.use(express.json());
-app.use(cors({
-    origin: 'https://frontend-weld-eta-50.vercel.app',
-    methods: ['GET', 'POST', 'PUT'], // Add 'PUT' here
-    credentials: true,
-}));
 
 // Connect to MongoDB
 connectDB();
@@ -44,7 +44,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/request', requestRoutes);
-app.use('/api/upload', uploadRoutes); 
+app.use('/api/upload', uploadRoutes);
 app.use('/api/meet', meetRoutes);
 
 // Socket.IO Logic
@@ -54,18 +54,13 @@ io.on('connection', (socket) => {
     // Listen for 'joinRoom' to join a specific user room
     socket.on('joinRoom', (userId) => {
         socket.join(userId);
-        // console.log(User ${userId} joined room ${userId});
     });
 
     // Handle sending messages
     socket.on('sendMessage', async (message) => {
         try {
-            let senderUsername = message.senderUsername;
-            if (!senderUsername) {
-                const user = await User.findById(message.sender);
-                senderUsername = user ? user.username : 'Unknown';
-            }
-
+            let senderUsername = message.senderUsername || (await getSenderUsername(message.sender));
+            
             const newMessage = new Message({
                 ...message,
                 senderUsername,
@@ -75,13 +70,6 @@ io.on('connection', (socket) => {
 
             // Emit the message to the receiver's room
             io.to(message.receiver).emit('messageReceived', {
-                ...message,
-                senderUsername,
-                _id: newMessage._id,
-                timestamp: newMessage.timestamp,
-            });
-
-            socket.emit('messageReceived', {
                 ...message,
                 senderUsername,
                 _id: newMessage._id,
@@ -97,6 +85,11 @@ io.on('connection', (socket) => {
     });
 });
 
+// Helper function to get sender username
+async function getSenderUsername(senderId) {
+    const user = await User.findById(senderId);
+    return user ? user.username : 'Unknown';
+}
 
 // Start the server
 const PORT = process.env.PORT || 5000;
