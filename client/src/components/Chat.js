@@ -11,7 +11,7 @@ const API_URL = 'http://localhost:5000'; // Use your deployed backend URL
 
 // Initialize Socket.IO client with the deployed API URL and with credentials
 const socket = io(API_URL, {
-    transports: ['websocket', 'polling'],
+    transports: ['websocket'],
     withCredentials: true,
   });
   

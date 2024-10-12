@@ -46,8 +46,10 @@ const io = socketIo(server, {
         origin: allowedOrigins,
         methods: ['GET', 'POST'],
         credentials: true
-    }
+    },
+    transports: ['websocket'] // Force WebSocket only
 });
+
 app.set('io', io);
 
 // Connect to MongoDB
