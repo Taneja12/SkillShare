@@ -22,7 +22,7 @@ const server = http.createServer(app);
 
 // CORS configuration
 const corsOptions = {
-    origin: 'https://frontend-weld-eta-50.vercel.app',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT'],
     credentials: true,
 };
