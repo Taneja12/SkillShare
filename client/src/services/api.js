@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
-
+// Update the backend URL to the Render deployment
+const API_URL = 'https://skillshare-p28w.onrender.com/api';
 
 export const registerUser = async (userData) => {
   try {
@@ -36,8 +36,6 @@ export const loginUser = async (formData) => {
     }
   }
 };
-
-
 
 // Fetch chat history
 export const getChatHistory = async (currentUserId, userId) => {
@@ -76,7 +74,6 @@ export const sendMessage = async (messageData) => {
 export const fetchMatchedUsers = async (userId) => {
   try {
     const response = await axios.get(`${API_URL}/match/${userId}`);
-    // console.log(response);
     return response.data;
   } catch (error) {
     console.error('Error fetching matched users:', error);
@@ -104,9 +101,10 @@ export const uploadProfilePicture = async (file, userId) => {
     throw error;
   }
 };
+
 export const generateGoogleMeetLink = async (hostEmail) => {
   try {
-      const response = await axios.post('http://localhost:5000/api/meet/generate-meet-link', { hostEmail });
+      const response = await axios.post(`${API_URL}/meet/generate-meet-link`, { hostEmail });
       return response.data.meetLink;
   } catch (error) {
       console.error('Error creating Google Meet link:', error);
@@ -114,6 +112,5 @@ export const generateGoogleMeetLink = async (hostEmail) => {
 };
 
 export const initiateGoogleAuth = async () => {
-  window.location.href = 'http://localhost:5000/api/meet/auth/google'; // Redirect to your backend auth route
+  window.location.href = `${API_URL}/meet/auth/google`; // Redirect to your backend auth route
 };
-
