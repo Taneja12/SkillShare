@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Update the backend URL to the Render deployment
-const API_URL = 'https://skillshare-p28w.onrender.com/api';
+const API_URL = 'http://localhost:5000/api';
 
 export const registerUser = async (userData) => {
   try {
