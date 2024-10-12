@@ -11,7 +11,7 @@ const API_URL = 'https://skillshare-p28w.onrender.com'; // Use your deployed bac
 
 // Initialize Socket.IO client with the deployed API URL and with credentials
 const socket = io(API_URL, {
-    transports: ['websocket'],
+    transports: ['websocket','polling'],
     withCredentials: true,
   });
   
