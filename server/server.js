@@ -23,7 +23,7 @@ const server = http.createServer(app);
 // Initialize Socket.IO with proper CORS settings
 const io = socketIo(server, {
     cors: {
-        origin: 'http://localhost:3000',
+        origin: 'https://frontend-weld-eta-50.vercel.app',
         methods: ['GET', 'POST', 'PUT'], // Add 'PUT' here
         credentials: true,
     },
@@ -31,7 +31,7 @@ const io = socketIo(server, {
 app.set('io', io);
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'https://frontend-weld-eta-50.vercel.app',
     methods: ['GET', 'POST', 'PUT'], // Add 'PUT' here
     credentials: true,
 }));
