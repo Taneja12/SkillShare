@@ -6,8 +6,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/Chat.css';
 import { getChatHistory, generateGoogleMeetLink, initiateGoogleAuth } from '../services/api'; // Import the API function for Meet link and auth
 
-// Initialize Socket.IO client
-const socket = io('http://localhost:5000');
+// Set the API URL directly
+const API_URL = 'https://skillshare-p28w.onrender.com'; // Update this with your backend URL
+const socket = io(API_URL); // Initialize Socket.IO client with the API URL
 
 const Chat = () => {
     const { userId } = useParams();
@@ -68,8 +69,8 @@ const Chat = () => {
 
     const handleClick = () => {
         // Redirect to the backend Google OAuth route
-        window.location.href = 'http://localhost:5000/api/meet/google/auth';
-      };
+        window.location.href = `${API_URL}/api/meet/google/auth`;
+    };
 
     const handleGenerateMeetLink = async () => {
         setGeneratingLink(true); // Set generating state to true
