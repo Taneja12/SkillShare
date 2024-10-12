@@ -1,7 +1,8 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-
+// Register new user
 exports.register = async (req, res) => {
   const { username, email, password, skillsToTeach, skillsToLearn } = req.body;
 
@@ -37,11 +38,15 @@ exports.register = async (req, res) => {
       ? skillsToLearn
       : skillsToLearn.split(',').map(skill => skill.trim());
 
-    // Create the user object (password hashing happens automatically in the model's pre-save hook)
+    // Encrypt password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create new user object with the hashed password
     const user = new User({
       username,
       email,
-      password, // Password is automatically hashed in the User model
+      password: hashedPassword, // Store hashed password
       skillsToTeach: skillsTeachArray,
       skillsToLearn: skillsLearnArray,
     });
@@ -69,31 +74,34 @@ exports.register = async (req, res) => {
   }
 };
 
-
 // User login
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
 
   try {
     // Check for missing fields
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
+    if (!password || (!email && !username)) {
+      return res.status(400).json({ error: "Username/Email and password are required" });
     }
 
-    // Check if the user exists
-    const user = await User.findOne({ email });
+    // Check if the user exists (by email or username)
+    const user = await User.findOne({ $or: [{ email }, { username }] });
     if (!user) {
-      return res.status(404).json({ error: "No user found with this email" }); // More specific error message
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Compare with hashed password
-    const isMatch = await user.comparePassword(password); // Assuming comparePassword method in the model
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: "Incorrect password" }); // Specific message for incorrect password
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
     // Generate JWT token after successful login
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { userId: user._id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
     // Return the token in the response
     res.json({ token });

@@ -3,7 +3,7 @@ import { registerUser } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import skillsData from './skills';
+import skillsData from './skills'; // Import the skills data
 import { useAuth } from '../Contexts/AuthContext';
 
 // Convert skillsData into options for React Select
@@ -11,6 +11,12 @@ const skillCategories = Object.keys(skillsData).map(category => ({
   value: category,
   label: category,
 }));
+
+const skillLevels = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'expert', label: 'Expert' },
+];
 
 const Register = () => {
   const { login } = useAuth();
@@ -22,6 +28,8 @@ const Register = () => {
     skillsToTeach: [],
     skillsToLearn: [],
     skillsDescription: { teaching: '', learning: '' },
+    teachingLevels: {},
+    learningLevels: {},
   });
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
@@ -29,20 +37,35 @@ const Register = () => {
   const [learningCategory, setLearningCategory] = useState(null);
   const navigate = useNavigate();
 
+  // Handling input field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Handle React-Select changes
   const handleSelectChange = (selectedOptions, fieldName) => {
     const values = selectedOptions ? selectedOptions.map(option => option.value) : [];
     setFormData(prev => ({ ...prev, [fieldName]: values }));
   };
 
+  const handleLevelChange = (skill, level, type) => {
+    setFormData(prev => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        [skill]: level,
+      },
+    }));
+  };
+
+  // Go to the next step
   const handleNextStep = (e) => {
     e.preventDefault();
     const { username, email, password, confirmPassword } = formData;
+
     if (currentStep === 1) {
+      // Basic validation for Step 1 (username, email, password)
       if (!username || !email || !password || !confirmPassword) {
         setError('All fields are required');
         return;
@@ -51,38 +74,46 @@ const Register = () => {
         setError('Passwords do not match');
         return;
       }
-      setCurrentStep(2);
-    } else {
-      setCurrentStep(3);
+      setCurrentStep(2); // Move to Step 2
+    } else if (currentStep === 2) {
+      // Ensure both skillsToTeach and skillsToLearn are selected
+      if (!formData.skillsToTeach.length || !formData.skillsToLearn.length) {
+        setError('You must select skills to teach and learn');
+        return;
+      }
+      setCurrentStep(3); // Move to Step 3
     }
     setError('');
   };
-  
+
+  // Submit final data
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Reset previous error
-    
-    const { skillsDescription, skillsToTeach, skillsToLearn } = formData;
-  
+
+    const { skillsDescription, skillsToTeach, skillsToLearn, teachingLevels, learningLevels } = formData;
+
     // Check if there are any common skills between "Skills to Teach" and "Skills to Learn"
     const commonSkills = skillsToTeach.filter(skill => skillsToLearn.includes(skill));
     if (commonSkills.length > 0) {
       setError('You cannot select the same skill for both teaching and learning');
       return;
     }
-  
+
     const formattedData = {
       ...formData,
       skillsToTeach: skillsToTeach.map(skill => ({
         skill,
         elaboration: skillsDescription.teaching || '',
+        level: teachingLevels[skill] || 'beginner', // Default to 'beginner' if no level is set
       })),
       skillsToLearn: skillsToLearn.map(skill => ({
         skill,
         elaboration: skillsDescription.learning || '',
+        desiredLevel: learningLevels[skill] || 'beginner', // Default to 'beginner'
       })),
     };
-  
+
     try {
       const response = await registerUser(formattedData);
       const { token } = response;
@@ -95,19 +126,12 @@ const Register = () => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-  
-      // Check if the error is from the backend
       const errorMessage = error.message || 'Error in registration. Please try again.';
-      
-      // Set the error message to be displayed
-      setError(errorMessage); 
-  
-      // Log the detailed error message for debugging
-      console.error('Detailed error:', error.response?.data);
+      setError(errorMessage);
     }
   };
-  
-  
+
+  // Render form steps dynamically
   const renderFormStep = () => {
     if (currentStep === 1) {
       return (
@@ -134,7 +158,7 @@ const Register = () => {
       return (
         <>
           <div className="mb-2">
-            <label className="form-label">Skills You Can Teach:</label>
+            <label className="form-label">Skills You Can Teach (Select Category):</label>
             <Select
               isMulti
               name="teachingCategories"
@@ -158,7 +182,7 @@ const Register = () => {
             </div>
           )}
           <div className="mb-2">
-            <label className="form-label">Skills You Want to Learn:</label>
+            <label className="form-label">Skills You Want to Learn (Select Category):</label>
             <Select
               name="learningCategory"
               options={skillCategories}
@@ -203,6 +227,32 @@ const Register = () => {
               className="form-control"
               placeholder="Describe your learning skills"
             />
+          </div>
+          <div className="mb-2">
+            <h6>Select Skill Levels for Skills to Teach:</h6>
+            {formData.skillsToTeach.map(skill => (
+              <div key={skill} className="mb-2">
+                <label>{skill}</label>
+                <Select
+                  options={skillLevels}
+                  classNamePrefix="select"
+                  onChange={(option) => handleLevelChange(skill, option.value, 'teachingLevels')}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="mb-2">
+            <h6>Select Skill Levels for Skills to Learn:</h6>
+            {formData.skillsToLearn.map(skill => (
+              <div key={skill} className="mb-2">
+                <label>{skill}</label>
+                <Select
+                  options={skillLevels}
+                  classNamePrefix="select"
+                  onChange={(option) => handleLevelChange(skill, option.value, 'learningLevels')}
+                />
+              </div>
+            ))}
           </div>
           <button type="submit" className="btn btn-primary w-100 mt-2">Next</button>
         </>

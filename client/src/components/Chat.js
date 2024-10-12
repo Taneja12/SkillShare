@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Contexts/AuthContext';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/Chat.css';
-import { getChatHistory } from '../services/api'; // Import the refactored API function
+import { getChatHistory, generateGoogleMeetLink, initiateGoogleAuth } from '../services/api'; // Import the API function for Meet link and auth
 
 // Initialize Socket.IO client
 const socket = io('http://localhost:5000');
@@ -15,7 +15,9 @@ const Chat = () => {
     const [messages, setMessages] = useState([]);
     const [messageContent, setMessageContent] = useState('');
     const [loading, setLoading] = useState(true);
+    const [generatingLink, setGeneratingLink] = useState(false);
     const chatBoxRef = useRef(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -35,7 +37,6 @@ const Chat = () => {
 
         if (currentUser) {
             socket.emit('joinRoom', currentUser.userId);
-            // console.log('User joined room:', currentUser.userId);
 
             // Real-time messages
             socket.on('messageReceived', (message) => {
@@ -65,6 +66,36 @@ const Chat = () => {
         setMessageContent('');
     };
 
+    const handleClick = () => {
+        // Redirect to the backend Google OAuth route
+        window.location.href = 'http://localhost:5000/api/meet/google/auth';
+      };
+
+    const handleGenerateMeetLink = async () => {
+        setGeneratingLink(true); // Set generating state to true
+        try {
+            const meetLink = await generateGoogleMeetLink(); // Call API to generate Google Meet link
+            if (meetLink) {
+                // Send the Google Meet link as a chat message
+                const newMessage = {
+                    sender: currentUser.userId,
+                    receiver: userId,
+                    content: `Google Meet Link: ${meetLink}`,
+                    timestamp: new Date(),
+                };
+                socket.emit('sendMessage', newMessage);
+            }
+        } catch (error) {
+            console.error('Error generating Google Meet link:', error);
+            // Optionally, redirect to Google authentication if not authorized
+            if (error.response && error.response.status === 403) {
+                initiateGoogleAuth(); // Redirect to Google auth
+            }
+        } finally {
+            setGeneratingLink(false); // Reset generating state
+        }
+    };
+
     useEffect(() => {
         if (chatBoxRef.current) {
             chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
@@ -88,7 +119,13 @@ const Chat = () => {
                         >
                             <div className="chat-bubble">
                                 <strong>{msg.sender === currentUser.userId ? 'You' : msg.senderUsername}</strong>
-                                : {msg.content}
+                                : {msg.content.includes('Google Meet Link') ? (
+                                    <a href={msg.content.split('Google Meet Link: ')[1]} target="_blank" rel="noopener noreferrer">
+                                        Join Meet
+                                    </a>
+                                ) : (
+                                    msg.content
+                                )}
                                 <small className="text-muted d-block">
                                     {new Date(msg.timestamp).toLocaleString()}
                                 </small>
@@ -111,6 +148,13 @@ const Chat = () => {
                 />
                 <button type="submit" className="btn btn-primary">Send</button>
             </form>
+
+            {/* Button to generate Google Meet link */}
+            <div className="mt-3">
+                <button onClick={handleClick} className="btn btn-secondary" disabled={generatingLink}>
+                    {generatingLink ? 'Generating...' : 'Generate Google Meet Link'}
+                </button>
+            </div>
         </div>
     );
 };

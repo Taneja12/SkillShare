@@ -2,65 +2,105 @@ const User = require('../models/User');
 
 const matchUsers = async (req, res) => {
   try {
-    const userId = req.params.id; // Get the current user ID from the request params
+    const userId = req.params.id; // Current user ID
 
-    // Fetch the current user's data including profile picture, skills to teach, and skills to learn
-    const currentUser = await User.findById(userId).select('username skillsToLearn skillsToTeach email phoneNumber profilePicture'); // Include profilePicture
+    // Fetch current user data
+    const currentUser = await User.findById(userId).select(
+      'username skillsToTeach skillsToLearn email phoneNumber profilePicture'
+    );
 
-    // Check if the user exists
     if (!currentUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    // Create arrays of skills to teach and learn for the current user
-    const skillsToTeachArray = currentUser.skillsToTeach.map(skillObj => skillObj.skill);
-    const skillsToLearnArray = currentUser.skillsToLearn.map(skillObj => skillObj.skill);
+    // Create arrays of skills and levels
+    const currentTeachSkills = currentUser.skillsToTeach;
+    const currentLearnSkills = currentUser.skillsToLearn;
 
-    // Find matches based on both conditions:
-    // 1. Match teaching skills of others to current user's learning skills.
-    // 2. Match learning skills of others to current user's teaching skills.
-    const matches = await User.find({
-      _id: { $ne: userId }, // Exclude the current user
-      $or: [
-        { skillsToTeach: { $elemMatch: { skill: { $in: skillsToLearnArray } } } }, // Teaching skill matches learning skill
-        { skillsToLearn: { $elemMatch: { skill: { $in: skillsToTeachArray } } } }  // Learning skill matches teaching skill
-      ]
-    }).select('username skillsToTeach skillsToLearn email phoneNumber profilePicture'); // Include profilePicture for matched users
+    // Find potential matches
+    const potentialMatches = await User.find({
+      _id: { $ne: userId }, // Exclude current user
+      'skillsToTeach.skill': { $in: currentLearnSkills.map((s) => s.skill) },
+      'skillsToLearn.skill': { $in: currentTeachSkills.map((s) => s.skill) },
+    }).select(
+      'username skillsToTeach skillsToLearn email phoneNumber profilePicture'
+    );
 
-    // Filter the matches to ensure only valid matches (based on both users' choices)
-    const validMatches = matches.filter(match => {
-      const matchedTeachingSkills = match.skillsToTeach.filter(skillObj => skillsToLearnArray.includes(skillObj.skill));
-      const matchedLearningSkills = match.skillsToLearn.filter(skillObj => skillsToTeachArray.includes(skillObj.skill));
+    // Helper function to compare skill levels
+    const levelToNumber = (level) => {
+      const levels = { beginner: 1, intermediate: 2, expert: 3 };
+      return levels[level] || 0;
+    };
 
-      // Ensure both conditions are met: teach/learn match for both users
-      return (matchedTeachingSkills.length > 0 && matchedLearningSkills.length > 0);
-    });
+    // Filter and score matches
+    const matchedUsers = potentialMatches
+      .map((match) => {
+        let matchScore = 0;
+        let canTeach = false;
+        let canLearn = false;
 
-    // Prepare the response with current user's information and valid matched users
+        // Check if match can teach current user
+        for (let learnSkill of currentLearnSkills) {
+          const matchTeachSkill = match.skillsToTeach.find(
+            (s) => s.skill === learnSkill.skill
+          );
+          if (
+            matchTeachSkill &&
+            levelToNumber(matchTeachSkill.level) >= levelToNumber(learnSkill.desiredLevel)
+          ) {
+            canTeach = true;
+            matchScore += 1; // Increase score for each valid teaching skill
+          }
+        }
+
+        // Check if match can learn from current user
+        for (let teachSkill of currentTeachSkills) {
+          const matchLearnSkill = match.skillsToLearn.find(
+            (s) => s.skill === teachSkill.skill
+          );
+          if (
+            matchLearnSkill &&
+            levelToNumber(teachSkill.level) >= levelToNumber(matchLearnSkill.desiredLevel)
+          ) {
+            canLearn = true;
+            matchScore += 1; // Increase score for each valid learning skill
+          }
+        }
+
+        if (canTeach && canLearn) {
+          return {
+            userId: match._id,
+            username: match.username,
+            profilePicture: match.profilePicture,
+            skillsToTeach: match.skillsToTeach,
+            skillsToLearn: match.skillsToLearn,
+            email: match.email,
+            phoneNumber: match.phoneNumber,
+            matchScore,
+          };
+        }
+        return null;
+      })
+      .filter((match) => match !== null)
+      .sort((a, b) => b.matchScore - a.matchScore); // Sort by matchScore
+
+    // Prepare the response
     const response = {
       currentUser: {
         username: currentUser.username,
-        profilePicture: currentUser.profilePicture, // Include profile picture in the response
+        profilePicture: currentUser.profilePicture,
         skillsToTeach: currentUser.skillsToTeach,
         skillsToLearn: currentUser.skillsToLearn,
         email: currentUser.email,
         phoneNumber: currentUser.phoneNumber,
       },
-      matchedUsers: validMatches.map(user => ({
-        userId: user._id,
-        username: user.username,
-        profilePicture: user.profilePicture, // Include profile picture for each matched user
-        skillsToTeach: user.skillsToTeach,
-        skillsToLearn: user.skillsToLearn,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-      })),
+      matchedUsers,
     };
 
-    res.status(200).json(response); // Return matched users along with current user info
+    res.status(200).json(response);
   } catch (error) {
     console.error('Error fetching matches:', error);
-    res.status(500).json({ message: "Error fetching matches", error });
+    res.status(500).json({ message: 'Error fetching matches', error });
   }
 };
 

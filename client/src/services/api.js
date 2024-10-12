@@ -19,7 +19,6 @@ export const registerUser = async (userData) => {
   }
 };
 
-// Login user
 export const loginUser = async (formData) => {
   try {
     const response = await axios.post(`${API_URL}/auth/login`, formData);
@@ -37,6 +36,7 @@ export const loginUser = async (formData) => {
     }
   }
 };
+
 
 
 // Fetch chat history
@@ -76,7 +76,7 @@ export const sendMessage = async (messageData) => {
 export const fetchMatchedUsers = async (userId) => {
   try {
     const response = await axios.get(`${API_URL}/match/${userId}`);
-    console.log(response);
+    // console.log(response);
     return response.data;
   } catch (error) {
     console.error('Error fetching matched users:', error);
@@ -104,3 +104,16 @@ export const uploadProfilePicture = async (file, userId) => {
     throw error;
   }
 };
+export const generateGoogleMeetLink = async (hostEmail) => {
+  try {
+      const response = await axios.post('http://localhost:5000/api/meet/generate-meet-link', { hostEmail });
+      return response.data.meetLink;
+  } catch (error) {
+      console.error('Error creating Google Meet link:', error);
+  }
+};
+
+export const initiateGoogleAuth = async () => {
+  window.location.href = 'http://localhost:5000/api/meet/auth/google'; // Redirect to your backend auth route
+};
+

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 // Create a User schema
 const UserSchema = new mongoose.Schema({
@@ -23,11 +22,15 @@ const UserSchema = new mongoose.Schema({
   },
   skillsToTeach: [{
     skill: { type: String, required: true },
-    elaboration: { type: String, required: true }
+    elaboration: { type: String, required: true },
+    level: { type: String, enum: ['beginner', 'intermediate', 'expert'], required: true }, // Skill level
+    category: { type: String, default: null }, // Optional: skill category
   }],
   skillsToLearn: [{
     skill: { type: String, required: true },
-    elaboration: { type: String, required: true }
+    elaboration: { type: String, required: true },
+    desiredLevel: { type: String, enum: ['beginner', 'intermediate', 'expert'], required: true }, // Desired skill level
+    category: { type: String, default: null }, // Optional: skill category
   }],
   role: {
     type: String,
@@ -37,26 +40,19 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  receivedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Users connected with
+  receivedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Incoming requests
+  sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Outgoing requests
+  location: { type: String, default: null }, // Optional: add location for filtering
+  languages: [{ type: String, default: null }], // Optional: add languages for filtering
 }, {
-  timestamps: true,
+  timestamps: true, // Track creation and update timestamps
 });
 
-// Hash password before saving
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-// Method to compare password during login
-UserSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
+// Add indexes for fast query performance
+UserSchema.index({ username: 1 });
+UserSchema.index({ email: 1 });
+UserSchema.index({ 'skillsToTeach.skill': 1 });
+UserSchema.index({ 'skillsToLearn.skill': 1 });
 
 module.exports = mongoose.model('User', UserSchema);

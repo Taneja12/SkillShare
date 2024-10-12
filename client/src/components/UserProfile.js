@@ -1,73 +1,81 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../Contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'react-bootstrap'; // Optional: Add Bootstrap spinner
+import { Spinner, Button, Image } from 'react-bootstrap'; // Import Bootstrap components
+import { FaUserCircle } from 'react-icons/fa'; // Import profile icon
 import '../css/UserProfle.css'; // Your custom CSS
 import { fetchMatchedUsers, uploadProfilePicture } from '../services/api'; // Import API functions
 
 const UserProfile = () => {
-  const { currentUser } = useAuth(); // Get the currentUser from AuthContext
-  const [matchedUsers, setMatchedUsers] = useState([]); // Default to an empty array
-  const [currentUserDetails, setCurrentUserDetails] = useState({}); // Use an object to store user details
-  const [loading, setLoading] = useState(true); // Add a loading state
-  const [error, setError] = useState(null); // Add error state
-  const [profilePicture, setProfilePicture] = useState(null); // State to hold the profile picture
-  const [selectedFile, setSelectedFile] = useState(null); // Store the selected image file
-  const navigate = useNavigate(); // Initialize useNavigate
+  const { currentUser } = useAuth();
+  const [matchedUsers, setMatchedUsers] = useState([]);
+  const [currentUserDetails, setCurrentUserDetails] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false); // Add state for uploading
+  const [error, setError] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const navigate = useNavigate();
 
-  // Fetch user data from the backend
   useEffect(() => {
     const fetchUserData = async () => {
       if (currentUser && currentUser.userId) {
         try {
           const data = await fetchMatchedUsers(currentUser.userId);
-          setMatchedUsers(data.matchedUsers); // Directly set matched users
-          setCurrentUserDetails(data.currentUser); // Set current user details
-          setProfilePicture(data.currentUser.profilePicture); // Load current profile picture
+          setMatchedUsers(data.matchedUsers);
+          setCurrentUserDetails(data.currentUser);
+          setProfilePicture(data.currentUser.profilePicture);
         } catch (error) {
-          console.error('Error fetching matched users:', error); // Keep error logging
+          console.error('Error fetching matched users:', error);
           setError('Unable to load user data. Please try again later.');
         } finally {
-          setLoading(false); // Stop loading when request is done
+          setLoading(false);
         }
       } else {
-        setLoading(false); // Stop loading if currentUser is not available
+        setLoading(false);
       }
     };
-
     fetchUserData();
   }, [currentUser]);
 
-  // Handle file selection
+  // Handle file selection and upload
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    const file = event.target.files[0];
+    setSelectedFile(file);
+    handleImageUpload(file);
   };
 
-  // Handle image upload
-  const handleImageUpload = async () => {
-    if (selectedFile && currentUser) {
+  const handleImageUpload = async (file) => {
+    if (file && currentUser) {
+      setUploading(true); // Show spinner during upload
       try {
-        const result = await uploadProfilePicture(selectedFile, currentUser.userId);
-        setProfilePicture(result.url); // Update state with new image URL
+        const result = await uploadProfilePicture(file, currentUser.userId);
+        setProfilePicture(result.url);
         console.log('Image uploaded successfully:', result.url);
       } catch (error) {
         console.error('Error uploading image:', error);
+      } finally {
+        setUploading(false); // Hide spinner after upload
       }
     } else {
       console.error('No file selected or user not found');
     }
   };
 
-  // Memoize skills rendering for optimization
   const renderSkills = useCallback(
-    (skills, title) => (
+    (skills, title, isTeaching) => (
       <>
         <h6>{title}:</h6>
         {Array.isArray(skills) && skills.length > 0 ? (
           <ul>
             {skills.map((skillObj, index) => (
-              <li key={`${title}-${index}-${skillObj.skill || skillObj.id}`}> {/* Ensure each skill has a unique key */}
+              <li key={`${title}-${index}-${skillObj.skill || skillObj.id}`}>
                 <strong>{skillObj.skill}</strong> - {skillObj.elaboration || 'No elaboration provided'}
+                {isTeaching ? (
+                  <span>{skillObj.level ? ` (Level: ${skillObj.level})` : ''}</span>
+                ) : (
+                  <span>{skillObj.desiredLevel ? ` (Current Level: ${skillObj.desiredLevel})` : ''}</span>
+                )}
               </li>
             ))}
           </ul>
@@ -79,7 +87,6 @@ const UserProfile = () => {
     []
   );
 
-  // Handle message click with useCallback to avoid re-renders
   const handleMessageClick = useCallback(
     (userId) => {
       if (userId) {
@@ -91,7 +98,6 @@ const UserProfile = () => {
     [navigate]
   );
 
-  // Handle send request click with useCallback to avoid re-renders
   const handleSendRequestClick = useCallback(
     (userId) => {
       console.log(`Request sent to user with ID: ${userId}`);
@@ -121,30 +127,41 @@ const UserProfile = () => {
       <div className="user-info mb-4">
         <h5>User ID: {currentUser ? currentUser.userId : 'No user available'}</h5>
 
-        {/* Profile Picture */}
-        {profilePicture ? (
-          <img
-            src={profilePicture}
-            alt="Profile"
-            className="rounded-circle profile-picture"
-            style={{ width: '100px', height: '100px' }} // Adjust size as needed
-          />
-        ) : (
-          <div>
-            {/* Show the upload option if no profile picture is present */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            <button className="btn btn-primary" onClick={handleImageUpload}>
-              Upload
-            </button>
-          </div>
-        )}
+        {/* Profile Picture with hover effect and spinner */}
+        <div className="profile-picture-wrapper" onClick={() => document.getElementById('fileInput').click()}>
+  {uploading && (
+    <div className="spinner-overlay">
+      <Spinner animation="border" role="status" className="profile-spinner">
+        <span className="visually-hidden">Uploading...</span>
+      </Spinner>
+    </div>
+  )}
+  {profilePicture ? (
+    <Image
+      src={profilePicture}
+      roundedCircle
+      className="profile-picture"
+      style={{ width: '100px', height: '100px' }}
+    />
+  ) : (
+    <FaUserCircle size={100} className="profile-icon" />
+  )}
+  
+  {/* Click to upload text */}
+  <div className="upload-text">Click to upload</div>
+  
+  <input
+    id="fileInput"
+    type="file"
+    accept="image/*"
+    style={{ display: 'none' }}
+    onChange={handleFileChange}
+  />
+</div>
 
-        {renderSkills(currentUserDetails.skillsToTeach, 'Skills to Teach')}
-        {renderSkills(currentUserDetails.skillsToLearn, 'Skills to Learn')}
+
+        {renderSkills(currentUserDetails.skillsToTeach, 'Skills to Teach', true)}
+        {renderSkills(currentUserDetails.skillsToLearn, 'Skills to Learn', false)}
       </div>
 
       <h2 className="text-center my-4">Matched Users</h2>
@@ -152,33 +169,28 @@ const UserProfile = () => {
       {matchedUsers.length > 0 ? (
         <div className="user-list">
           {matchedUsers.map((user) => (
-            <div className="user-card animate" key={user._id}>
+            <div className="user-card" key={user._id}>
               <h5 className="user-title">{user.username}</h5>
-
-              {/* Display matched user's profile picture */}
               {user.profilePicture && (
-                <img
+                <Image
                   src={user.profilePicture}
+                  roundedCircle
+                  style={{ width: '75px', height: '75px' }}
                   alt={`${user.username}'s profile`}
-                  className="rounded-circle matched-user-picture"
-                  style={{ width: '75px', height: '75px' }} // Adjust size as needed
                 />
               )}
+              {renderSkills(user.skillsToTeach, 'Skills to Teach', true)}
+              {renderSkills(user.skillsToLearn, 'Skills to Learn', false)}
 
-              {renderSkills(user.skillsToTeach, 'Skills to Teach')}
-              {renderSkills(user.skillsToLearn, 'Skills to Learn')}
+              {user.interests && <p>Interests: {user.interests.join(', ')}</p>}
+              {user.description && <p>Description: {user.description}</p>}
 
-              {user.interests && Array.isArray(user.interests) && user.interests.length > 0 && (
-                <p className="user-interests">Interests: {user.interests.join(', ')}</p>
-              )}
-              {user.description && <p className="user-description">Description: {user.description}</p>}
-
-              <button className="btn btn-primary" onClick={() => handleMessageClick(user.userId)}>
+              <Button variant="primary" onClick={() => handleMessageClick(user.userId)}>
                 Message
-              </button>
-              <button className="btn btn-secondary" onClick={() => handleSendRequestClick(user._id)}>
+              </Button>
+              <Button variant="secondary" onClick={() => handleSendRequestClick(user._id)}>
                 Send Request
-              </button>
+              </Button>
             </div>
           ))}
         </div>

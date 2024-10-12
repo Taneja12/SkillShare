@@ -9,6 +9,7 @@ const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const requestRoutes = require('./routes/requestRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const meetRoutes = require('./routes/meetRoutes');
 const Message = require('./models/Message');
 const User = require('./models/User');
 const cloudinary = require('./cloudinaryConfig'); // Make sure the path is correct
@@ -44,6 +45,7 @@ app.use('/api', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/request', requestRoutes);
 app.use('/api/upload', uploadRoutes); 
+app.use('/api/meet', meetRoutes);
 
 // Socket.IO Logic
 io.on('connection', (socket) => {
@@ -52,7 +54,7 @@ io.on('connection', (socket) => {
     // Listen for 'joinRoom' to join a specific user room
     socket.on('joinRoom', (userId) => {
         socket.join(userId);
-        // console.log(`User ${userId} joined room ${userId}`);
+        // console.log(User ${userId} joined room ${userId});
     });
 
     // Handle sending messages
