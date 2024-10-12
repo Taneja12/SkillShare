@@ -1,14 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../Contexts/AuthContext';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/Chat.css';
 import { getChatHistory, generateGoogleMeetLink, initiateGoogleAuth } from '../services/api'; // Import the API function for Meet link and auth
 
-// Set the API URL directly
-const API_URL = 'https://skillshare-p28w.onrender.com'; // Update this with your backend URL
-const socket = io(API_URL); // Initialize Socket.IO client with the API URL
+// Set the API URL to your deployed backend
+const API_URL = 'https://skillshare-p28w.onrender.com'; // Use your deployed backend URL
+
+// Initialize Socket.IO client with the deployed API URL and with credentials
+const socket = io(API_URL, {
+    withCredentials: true, // Enable credentials for cross-origin requests
+});
 
 const Chat = () => {
     const { userId } = useParams();
@@ -18,7 +22,6 @@ const Chat = () => {
     const [loading, setLoading] = useState(true);
     const [generatingLink, setGeneratingLink] = useState(false);
     const chatBoxRef = useRef(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -39,13 +42,14 @@ const Chat = () => {
         if (currentUser) {
             socket.emit('joinRoom', currentUser.userId);
 
-            // Real-time messages
+            // Listen for real-time messages
             socket.on('messageReceived', (message) => {
                 if (message.sender === userId || message.sender === currentUser.userId) {
                     setMessages((prevMessages) => [...prevMessages, message]);
                 }
             });
 
+            // Clean up when the component unmounts
             return () => {
                 socket.off('messageReceived');
             };
@@ -63,6 +67,7 @@ const Chat = () => {
             timestamp: new Date(),
         };
 
+        // Emit the message via Socket.IO
         socket.emit('sendMessage', newMessage);
         setMessageContent('');
     };
