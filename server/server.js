@@ -45,9 +45,9 @@ const io = socketIo(server, {
     cors: {
         origin: allowedOrigins,
         methods: ['GET', 'POST'],
-        credentials: true
+        credentials: true,
     },
-    transports: ['websocket'] // Force WebSocket only
+    transports: ['websocket', 'polling'], // Enable both 'websocket' and 'polling'
 });
 
 app.set('io', io);
@@ -69,12 +69,14 @@ io.on('connection', (socket) => {
 
     socket.on('joinRoom', (userId) => {
         socket.join(userId);
+        console.log(`User ${socket.id} joined room ${userId}`);
     });
+
 
     socket.on('sendMessage', async (message) => {
         try {
             let senderUsername = message.senderUsername || (await getSenderUsername(message.sender));
-            
+
             const newMessage = new Message({
                 ...message,
                 senderUsername,
@@ -93,8 +95,8 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+    socket.on('disconnect', (reason) => {
+        console.log(`User disconnected: ${socket.id} Reason: ${reason}`);
     });
 });
 
