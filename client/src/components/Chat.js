@@ -60,18 +60,24 @@ const Chat = () => {
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (!messageContent.trim()) return;
-
+    
         const newMessage = {
             sender: currentUser.userId,
             receiver: userId,
             content: messageContent,
             timestamp: new Date(),
         };
-
+    
         // Emit the message via Socket.IO
         socket.emit('sendMessage', newMessage);
+    
+        // Immediately update the messages state with the new message
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+    
+        // Clear the message input
         setMessageContent('');
     };
+    
 
     // Handle redirect to Google OAuth route
     const handleClick = () => {
