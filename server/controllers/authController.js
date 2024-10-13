@@ -104,7 +104,7 @@ exports.login = async (req, res) => {
     );
 
     // Return the token in the response
-    res.json({ token });
+    res.json({ token, userId: user._id  });
   } catch (error) {
     console.error("Login error:", error);
 
