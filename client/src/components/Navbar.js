@@ -1,66 +1,40 @@
 import React from 'react';
+import { Navbar, Nav } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../Contexts/AuthContext'; // Import the custom hook for auth context
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { useAuth } from '../Contexts/AuthContext';
 
-const Navbar = () => {
+const CustomNavbar = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, logout, currentUser } = useAuth(); // Get auth state and current user
+  const { isAuthenticated, logout, currentUser } = useAuth();
 
   const handleLogout = () => {
-    logout(); // Call logout from context
-    navigate('/'); // Redirect to home page
+    logout();
+    navigate('/');
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
-      <div className="container">
-        <Link to="/" className="navbar-brand">SkillShare</Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link to="/" className="nav-link">Home</Link>
-            </li>
-            {isAuthenticated ? (
-              <>
-                <li className="nav-item">
-                  <Link to={`/profile/${currentUser?.userId}`} className="nav-link">Profile</Link> {/* Use userId or appropriate identifier */}
-                </li>
-                <li className="nav-item">
-                  <Link to="/dashboard" className="nav-link">Dashboard</Link>
-                </li>
-                <li className="nav-item">
-                  <button className="btn btn-link nav-link" onClick={handleLogout}>
-                    Logout
-                  </button>
-                </li>
-              </>
-            ) : (
-              <>
-                <li className="nav-item">
-                  <Link to="/login" className="nav-link">Login</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to="/register" className="nav-link">Register</Link>
-                </li>
-              </>
-            )}
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <Navbar expand="lg" bg="light" variant="light">
+      <Navbar.Brand as={Link} to="/">SkillShare</Navbar.Brand>
+      <Navbar.Toggle aria-controls="navbar-nav" />
+      <Navbar.Collapse id="navbar-nav">
+        <Nav className="ml-auto">
+          <Nav.Link as={Link} to="/">Home</Nav.Link>
+          {isAuthenticated ? (
+            <>
+              <Nav.Link as={Link} to={`/profile/${currentUser?.userId}`}>Profile</Nav.Link>
+              <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
+              <Nav.Link as="button" onClick={handleLogout}>Logout</Nav.Link>
+            </>
+          ) : (
+            <>
+              <Nav.Link as={Link} to="/login">Login</Nav.Link>
+              <Nav.Link as={Link} to="/register">Register</Nav.Link>
+            </>
+          )}
+        </Nav>
+      </Navbar.Collapse>
+    </Navbar>
   );
 };
 
-export default Navbar;
+export default CustomNavbar;
