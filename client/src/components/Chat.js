@@ -4,17 +4,11 @@ import { useAuth } from '../Contexts/AuthContext';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/Chat.css';
-import { getChatHistory, generateGoogleMeetLink, initiateGoogleAuth } from '../services/api'; // Import the API function for Meet link and auth
+import { getChatHistory, generateGoogleMeetLink, initiateGoogleAuth } from '../services/api';
 
-// Set the API URL to your deployed backend
-const API_URL = 'https://skillshare-p28w.onrender.com'; // Use your deployed backend URL
+const API_URL = 'https://skillshare-p28w.onrender.com'; 
 
-// Initialize Socket.IO client with the deployed API URL and with credentials
-const socket = io(API_URL, {
-    transports: ['websocket','polling'],
-    withCredentials: true,
-  });
-  
+let socket; // Move socket initialization here
 
 const Chat = () => {
     const { userId } = useParams();
@@ -24,6 +18,27 @@ const Chat = () => {
     const [loading, setLoading] = useState(true);
     const [generatingLink, setGeneratingLink] = useState(false);
     const chatBoxRef = useRef(null);
+
+    useEffect(() => {
+        // Initialize Socket.IO connection
+        socket = io(API_URL,{
+            transports: ['websocket'],
+           });
+
+        // Join the room when the user is authenticated
+        if (currentUser) {
+            socket.emit('joinRoom', currentUser.userId);
+
+            // Listen for real-time messages
+            socket.on('messageReceived', (message) => {
+                setMessages((prevMessages) => [...prevMessages, message]);
+            });
+        }
+
+        return () => {
+            socket.disconnect(); // Clean up the socket connection
+        };
+    }, [currentUser]);
 
     useEffect(() => {
         const fetchMessages = async () => {
@@ -40,23 +55,7 @@ const Chat = () => {
         };
 
         fetchMessages();
-
-        if (currentUser) {
-            socket.emit('joinRoom', currentUser.userId);
-
-            // Listen for real-time messages
-            socket.on('messageReceived', (message) => {
-                if (message.sender === userId || message.sender === currentUser.userId) {
-                    setMessages((prevMessages) => [...prevMessages, message]);
-                }
-            });
-
-            // Clean up when the component unmounts
-            return () => {
-                socket.off('messageReceived');
-            };
-        }
-    }, [userId, currentUser]);
+    }, [currentUser, userId]);
 
     const handleSendMessage = (e) => {
         e.preventDefault();
@@ -74,6 +73,7 @@ const Chat = () => {
         setMessageContent('');
     };
 
+    // Handle redirect to Google OAuth route
     const handleClick = () => {
         // Redirect to the backend Google OAuth route
         window.location.href = `${API_URL}/api/meet/google/auth`;

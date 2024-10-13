@@ -36,6 +36,7 @@ const corsOptions = {
     credentials: true,
 };
 
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.options('*', cors(corsOptions));
@@ -49,6 +50,7 @@ const io = socketIo(server, {
     },
     transports: ['websocket', 'polling'], // Enable both 'websocket' and 'polling'
 });
+
 
 app.set('io', io);
 
@@ -72,7 +74,6 @@ io.on('connection', (socket) => {
         console.log(`User ${socket.id} joined room ${userId}`);
     });
 
-
     socket.on('sendMessage', async (message) => {
         try {
             let senderUsername = message.senderUsername || (await getSenderUsername(message.sender));
@@ -80,10 +81,12 @@ io.on('connection', (socket) => {
             const newMessage = new Message({
                 ...message,
                 senderUsername,
-                read: false
+                read: false,
+                timestamp: new Date(),
             });
             await newMessage.save();
 
+            // Emit the message to the receiver's room
             io.to(message.receiver).emit('messageReceived', {
                 ...message,
                 senderUsername,
@@ -99,6 +102,7 @@ io.on('connection', (socket) => {
         console.log(`User disconnected: ${socket.id} Reason: ${reason}`);
     });
 });
+
 
 // Helper function to get sender username
 async function getSenderUsername(senderId) {
