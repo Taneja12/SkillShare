@@ -11,7 +11,7 @@ const API_URL = 'https://skillshare-p28w.onrender.com';
 let socket; // Move socket initialization here
 
 const Chat = () => {
-    const { userId } = useParams();
+    const { userId,username } = useParams();
     const { currentUser } = useAuth();
     const [messages, setMessages] = useState([]);
     const [messageContent, setMessageContent] = useState('');
@@ -21,9 +21,9 @@ const Chat = () => {
 
     useEffect(() => {
         // Initialize Socket.IO connection
-        socket = io(API_URL,{
+        socket = io(API_URL, {
             transports: ['websocket'],
-           });
+        });
 
         // Join the room when the user is authenticated
         if (currentUser) {
@@ -60,24 +60,23 @@ const Chat = () => {
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (!messageContent.trim()) return;
-    
+
         const newMessage = {
             sender: currentUser.userId,
             receiver: userId,
             content: messageContent,
             timestamp: new Date(),
         };
-    
+
         // Emit the message via Socket.IO
         socket.emit('sendMessage', newMessage);
-    
+
         // Immediately update the messages state with the new message
         setMessages((prevMessages) => [...prevMessages, newMessage]);
-    
+
         // Clear the message input
         setMessageContent('');
     };
-    
 
     // Handle redirect to Google OAuth route
     const handleClick = () => {
@@ -94,10 +93,11 @@ const Chat = () => {
                 const newMessage = {
                     sender: currentUser.userId,
                     receiver: userId,
-                    content: `Google Meet Link: ${meetLink}`,
+                    content: `Google Meet Link: ${meetLink}`, // Include the link in the message content
                     timestamp: new Date(),
                 };
-                socket.emit('sendMessage', newMessage);
+                socket.emit('sendMessage', newMessage); // Emit the new message
+                setMessages((prevMessages) => [...prevMessages, newMessage]); // Immediately update the messages state
             }
         } catch (error) {
             console.error('Error generating Google Meet link:', error);
@@ -120,6 +120,7 @@ const Chat = () => {
 
     return (
         <div className="chat-container container mt-5">
+            <h3 className="text-center mb-4">Chat with {username}</h3>
             <div
                 className="chat-box border p-3 rounded"
                 style={{ maxHeight: '400px', overflowY: 'auto' }}

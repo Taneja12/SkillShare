@@ -7,11 +7,11 @@ import Register from './components/Register';
 import UserProfile from './components/UserProfile';
 import Chat from './components/Chat';
 import Navbar from './components/Navbar';
+import VerifySkill from './components/VerifySkill';
 
 const App = () => {
-  // Get the current user's authentication status from the context
-  const { isAuthenticated } = useContext(AuthContext); // Ensure this is inside the AuthProvider
-
+  // Get the current user's authentication status and userId from the context
+  const { isAuthenticated, currentUser } = useContext(AuthContext); // Make sure userId is available in AuthContext
   return (
     <Router>
       <Navbar />
@@ -30,7 +30,13 @@ const App = () => {
 
         {/* Other routes */}
         <Route path="/profile/:id" element={<UserProfile />} />
-        <Route path="/messages/:userId" element={<Chat />} />
+        <Route path="/messages/:userId/:username" element={<Chat />} />
+
+        {/* Pass userId as a prop to VerifySkill */}
+        <Route 
+          path="/skill-verification/:skill" 
+          element={<VerifySkill userId={currentUser?.userId} />} 
+        />
       </Routes>
     </Router>
   );

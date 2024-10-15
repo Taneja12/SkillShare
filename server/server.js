@@ -15,14 +15,18 @@ require('dotenv').config();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
+
 const app = express();
 const server = http.createServer(app);
-
+app.use(cors()); // Enable CORS so frontend can communicate with backend
+app.use(express.json()); // Parse JSON bodies
 // CORS Configuration
 const allowedOrigins = [
     'http://localhost:3000',
     'https://skill-share-deepanshu-tanejas-projects.vercel.app',
 ];
+
+
 
 const corsOptions = {
     origin: function (origin, callback) {

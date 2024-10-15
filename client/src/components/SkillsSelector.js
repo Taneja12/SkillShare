@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import skillsData from './skills'; // Adjust the path based on your folder structure
+import { Form, Button, Alert, Fade } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is included
 
 const SkillsSelector = ({ onSkillsSelect }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSkill, setSelectedSkill] = useState('');
-  const [elaboration, setElaboration] = useState(''); // For skill elaboration
-  const [level, setLevel] = useState(''); // For skill level
+  const [elaboration, setElaboration] = useState('');
+  const [level, setLevel] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
+  const [fadeIn, setFadeIn] = useState(true);
 
-  const skillLevels = ['beginner', 'intermediate', 'expert']; // Valid levels
+  const skillLevels = ['beginner', 'intermediate', 'expert'];
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
-    setSelectedSkill(''); // Reset selected skill when category changes
-    setElaboration(''); // Reset elaboration
-    setLevel(''); // Reset level
+    setSelectedSkill('');
+    setElaboration('');
+    setLevel('');
   };
 
   const handleSkillChange = (e) => {
@@ -30,75 +34,84 @@ const SkillsSelector = ({ onSkillsSelect }) => {
 
   const handleAddSkill = () => {
     if (selectedSkill && elaboration && level) {
-      // Create an object with the required skill details
       const skillObject = {
         skill: selectedSkill,
-        elaboration, // Elaboration input value
-        level, // Level input value
-        category: selectedCategory, // Optionally include category
+        elaboration,
+        level,
+        category: selectedCategory,
       };
-  
-      // Debugging - log the skillObject
-      console.log('Adding skill:', skillObject);
-  
-      onSkillsSelect(skillObject); // Pass the selected skill object to the parent
+
+      // console.log('Adding skill:', skillObject);
+      onSkillsSelect(skillObject);
+      setShowAlert(false); // Show success alert
+      setFadeIn(true); // Reset fade for animation
+
       // Clear inputs
       setSelectedSkill('');
       setElaboration('');
       setLevel('');
-      setSelectedCategory(''); // Reset category after adding skill
+      setSelectedCategory('');
     }
   };
-  
 
   return (
     <div className="skills-selector">
-      <div className="form-group">
-        <label htmlFor="skillCategory">Select Skill Category:</label>
-        <select id="skillCategory" value={selectedCategory} onChange={handleCategoryChange}>
-          <option value="">Select a category</option>
-          {Object.keys(skillsData).map((category) => (
-            <option key={category} value={category}>{category}</option>
-          ))}
-        </select>
-      </div>
-
-      {selectedCategory && (
-        <div className="form-group">
-          <label htmlFor="specificSkill">Select Specific Skill:</label>
-          <select id="specificSkill" value={selectedSkill} onChange={handleSkillChange}>
-            <option value="">Select a skill</option>
-            {skillsData[selectedCategory].map((skill) => (
-              <option key={skill} value={skill}>{skill}</option>
+      <Form>
+        <Form.Group controlId="skillCategory">
+          <Form.Label>Select Skill Category:</Form.Label>
+          <Form.Control as="select" value={selectedCategory} onChange={handleCategoryChange}>
+            <option value="">Select a category</option>
+            {Object.keys(skillsData).map((category) => (
+              <option key={category} value={category}>{category}</option>
             ))}
-          </select>
-        </div>
-      )}
+          </Form.Control>
+        </Form.Group>
 
-      <div className="form-group">
-        <label htmlFor="elaboration">Elaboration:</label>
-        <input
-          type="text"
-          id="elaboration"
-          value={elaboration}
-          onChange={handleElaborationChange}
-          placeholder="Describe your skill"
-        />
-      </div>
+        {selectedCategory && (
+          <Form.Group controlId="specificSkill">
+            <Form.Label>Select Specific Skill:</Form.Label>
+            <Form.Control as="select" value={selectedSkill} onChange={handleSkillChange}>
+              <option value="">Select a skill</option>
+              {skillsData[selectedCategory].map((skill) => (
+                <option key={skill} value={skill}>{skill}</option>
+              ))}
+            </Form.Control>
+          </Form.Group>
+        )}
 
-      <div className="form-group">
-        <label htmlFor="level">Level:</label>
-        <select id="level" value={level} onChange={handleLevelChange}>
-          <option value="">Select a level</option>
-          {skillLevels.map((lvl) => (
-            <option key={lvl} value={lvl}>{lvl}</option>
-          ))}
-        </select>
-      </div>
+        <Form.Group controlId="elaboration">
+          <Form.Label>Elaboration:</Form.Label>
+          <Form.Control
+            type="text"
+            value={elaboration}
+            onChange={handleElaborationChange}
+            placeholder="Describe your skill"
+          />
+        </Form.Group>
 
-      <button onClick={handleAddSkill} disabled={!selectedSkill || !elaboration || !level}>
-        Add Skill
-      </button>
+        <Form.Group controlId="level">
+          <Form.Label>Level:</Form.Label>
+          <Form.Control as="select" value={level} onChange={handleLevelChange}>
+            <option value="">Select a level</option>
+            {skillLevels.map((lvl) => (
+              <option key={lvl} value={lvl}>{lvl}</option>
+            ))}
+          </Form.Control>
+        </Form.Group>
+
+        <Fade in={fadeIn}>
+          <Button
+            variant="primary"
+            onClick={handleAddSkill}
+            disabled={!selectedSkill || !elaboration || !level}
+            onMouseEnter={() => setFadeIn(false)} // Reset fade on hover
+          >
+            Add Skill
+          </Button>
+        </Fade>
+
+        
+      </Form>
     </div>
   );
 };

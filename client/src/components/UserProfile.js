@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../Contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Spinner, Button, Image, Dropdown } from 'react-bootstrap';
-import { FaUserCircle } from 'react-icons/fa';
-import '../css/UserProfle.css';
-import { fetchMatchedUsers, uploadProfilePicture, updateSkills } from '../services/api'; // Update API
-import SkillsSelector from './SkillsSelector'; // Import the SkillsSelector component
+import { Spinner, Button, Image, Dropdown, Card, ProgressBar, Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { FaUserCircle, FaCheckCircle, FaPen, FaUpload } from 'react-icons/fa';
+import { fetchMatchedUsers, uploadProfilePicture, updateSkills } from '../services/api';
+import SkillsSelector from './SkillsSelector';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../css/UserProfile.css'; // Custom styles for further enhancements
 
 const UserProfile = () => {
   const { currentUser } = useAuth();
@@ -16,9 +17,9 @@ const UserProfile = () => {
   const [error, setError] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [showTeachSkillsSelector, setShowTeachSkillsSelector] = useState(false); // Toggle for skills to teach
-  const [showLearnSkillsSelector, setShowLearnSkillsSelector] = useState(false); // Toggle for skills to learn
-  const [skillLevelFilter, setSkillLevelFilter] = useState(''); // New state for filter
+  const [showTeachSkillsSelector, setShowTeachSkillsSelector] = useState(false);
+  const [showLearnSkillsSelector, setShowLearnSkillsSelector] = useState(false);
+  const [skillLevelFilter, setSkillLevelFilter] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,7 +51,7 @@ const UserProfile = () => {
 
   const handleImageUpload = async (file) => {
     if (file && currentUser) {
-      setUploading(true); 
+      setUploading(true);
       try {
         const result = await uploadProfilePicture(file, currentUser.userId);
         setProfilePicture(result.url);
@@ -66,10 +67,10 @@ const UserProfile = () => {
     const updatedSkills = isTeaching
       ? [...currentUserDetails.skillsToTeach, skill]
       : [...currentUserDetails.skillsToLearn, skill];
-  
+
     try {
       await updateSkills(currentUser.userId, updatedSkills, isTeaching);
-  
+
       if (isTeaching) {
         setCurrentUserDetails({
           ...currentUserDetails,
@@ -85,45 +86,83 @@ const UserProfile = () => {
       console.error('Error updating skills:', error);
     }
   };
-  
+
   const handleFilterChange = (level) => {
     setSkillLevelFilter(level);
   };
 
-  // Filter matched users based on selected skill level filter
-  const filteredMatchedUsers = matchedUsers.filter(user =>
-    user.skillsToTeach.some(skill => skill.level === skillLevelFilter || skillLevelFilter === '')
+  const filteredMatchedUsers = matchedUsers.filter((user) =>
+    user.skillsToTeach.some(
+      (skill) => skill.level === skillLevelFilter || skillLevelFilter === ''
+    )
   );
 
+  const navigateToVerify = (skill) => {
+    navigate(`/skill-verification/${skill}`, { state: { skill } });
+  };
+
   const renderSkills = useCallback(
-    (skills, title, isTeaching) => (
-      <>
-        <h6>{title}:</h6>
-        {Array.isArray(skills) && skills.length > 0 ? (
-          <ul>
-            {skills.map((skillObj, index) => (
-              <li key={`${title}-${index}-${skillObj.skill}`}>
-                <strong>{skillObj.skill}</strong> - {skillObj.elaboration || 'No elaboration provided'}
-                {isTeaching ? (
-                  <span>{skillObj.level ? ` (Level: ${skillObj.level})` : ''}</span>
-                ) : (
-                  <span>{skillObj.desiredLevel ? ` (Current Level: ${skillObj.desiredLevel})` : ''}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No skills available</p>
-        )}
-      </>
+    (skills, title, isTeaching, isCurrentUser = false) => (
+      <Card className="mb-3 fade-in">
+        <Card.Header>
+          <h6>{title}</h6>
+        </Card.Header>
+        <Card.Body>
+          {Array.isArray(skills) && skills.length > 0 ? (
+            <ul className="skill-list">
+              {skills.map((skillObj, index) => (
+                <li key={`${title}-${index}-${skillObj.skill}`} className="mb-2">
+                  <strong>{skillObj.skill}</strong> - {skillObj.elaboration || 'No elaboration provided'}
+                  {isTeaching ? (
+                    <>
+                      <span>{skillObj.level ? ` (Level: ${skillObj.level})` : ''}</span>
+                      {isCurrentUser ? (
+                        skillObj.verified_status === 'verified' ? (
+                          <span className="verified-badge text-success ms-2">
+                            <FaCheckCircle /> Verified
+                          </span>
+                        ) : (
+                          <Button
+                            variant="outline-primary"
+                            className="ml-2"
+                            size="sm"
+                            onClick={() => navigateToVerify(skillObj.skill)}
+                          >
+                            Verify Skill
+                          </Button>
+                        )
+                      ) : (
+                        <span className="ms-2">
+                          {skillObj.verified_status === 'verified' ? (
+                            <span className="text-success">
+                              <FaCheckCircle /> Verified
+                            </span>
+                          ) : (
+                            <span className="text-danger">
+                            </span>
+                          )}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span>{skillObj.level ? ` (Desired Level: ${skillObj.level})` : ''}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No skills available</p>
+          )}
+        </Card.Body>
+      </Card>
     ),
-    []
+    [navigateToVerify]
   );
 
   if (loading) {
     return (
       <div className="text-center my-5">
-        <Spinner animation="border" role="status">
+        <Spinner animation="border" role="status" className="fade-in">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
       </div>
@@ -131,73 +170,67 @@ const UserProfile = () => {
   }
 
   if (error) {
-    return <div className="text-center text-danger my-5">{error}</div>;
+    return <div className="text-center text-danger my-5 fade-in">{error}</div>;
   }
 
   return (
-    <div className="container my-5 user-profile">
+    <div className="container my-5 user-profile fade-in">
       <h1 className="text-center mb-4">User Profile</h1>
 
-      {/* Current User Profile */}
-      <div className="user-info mb-4">
-        <h5>User ID: {currentUser ? currentUser.userId : 'No user available'}</h5>
+      <Card className="shadow-lg p-4 mb-4 fade-in">
+        <Card.Body>
+          <h5>User ID: {currentUser ? currentUser.userId : 'No user available'}</h5>
 
-        {/* Profile Picture */}
-        <div className="profile-picture-wrapper" onClick={() => document.getElementById('fileInput').click()}>
-          {uploading && (
-            <div className="spinner-overlay">
-              <Spinner animation="border" role="status" className="profile-spinner">
-                <span className="visually-hidden">Uploading...</span>
-              </Spinner>
-            </div>
-          )}
-          {profilePicture ? (
-            <Image
-              src={profilePicture}
-              roundedCircle
-              className="profile-picture"
-              style={{ width: '100px', height: '100px' }}
+          <div className="profile-picture-wrapper mx-auto my-4 text-center" onClick={() => document.getElementById('fileInput').click()}>
+            {uploading && (
+              <div className="spinner-overlay">
+                <Spinner animation="border" role="status" className="profile-spinner">
+                  <span className="visually-hidden">Uploading...</span>
+                </Spinner>
+                <ProgressBar animated now={80} variant="primary" className="mt-2" />
+              </div>
+            )}
+            {profilePicture ? (
+              <Image
+                src={profilePicture}
+                roundedCircle
+                className="profile-picture"
+                style={{ width: '120px', height: '120px' }}
+              />
+            ) : (
+              <FaUserCircle size={120} className="profile-icon" />
+            )}
+            <div className="upload-text mt-2">Click to upload</div>
+            <input
+              id="fileInput"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
             />
-          ) : (
-            <FaUserCircle size={100} className="profile-icon" />
+          </div>
+
+          {renderSkills(currentUserDetails.skillsToTeach, 'Skills to Teach', true, true)}
+          <Button onClick={() => setShowTeachSkillsSelector(!showTeachSkillsSelector)} className="mt-2">
+            {showTeachSkillsSelector ? 'Cancel' : 'Add Skills to Teach'}
+          </Button>
+          {showTeachSkillsSelector && (
+            <SkillsSelector onSkillsSelect={(skill) => handleAddSkill(skill, true)} />
           )}
-          <div className="upload-text">Click to upload</div>
-          <input
-            id="fileInput"
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-        </div>
 
-        {/* Display and Edit Skills to Teach */}
-        {renderSkills(currentUserDetails.skillsToTeach, 'Skills to Teach', true)}
-        <Button onClick={() => setShowTeachSkillsSelector(!showTeachSkillsSelector)}>
-          {showTeachSkillsSelector ? 'Cancel' : 'Add Skills to Teach'}
-        </Button>
-        {showTeachSkillsSelector && (
-          <SkillsSelector
-            onSkillsSelect={(skill) => handleAddSkill(skill, true)}
-          />
-        )}
+          {renderSkills(currentUserDetails.skillsToLearn, 'Skills to Learn', false)}
+          <Button onClick={() => setShowLearnSkillsSelector(!showLearnSkillsSelector)} className="mt-2">
+            {showLearnSkillsSelector ? 'Cancel' : 'Add Skills to Learn'}
+          </Button>
+          {showLearnSkillsSelector && (
+            <SkillsSelector onSkillsSelect={(skill) => handleAddSkill(skill, false)} />
+          )}
+        </Card.Body>
+      </Card>
 
-        {/* Display and Edit Skills to Learn */}
-        {renderSkills(currentUserDetails.skillsToLearn, 'Skills to Learn', false)}
-        <Button onClick={() => setShowLearnSkillsSelector(!showLearnSkillsSelector)}>
-          {showLearnSkillsSelector ? 'Cancel' : 'Add Skills to Learn'}
-        </Button>
-        {showLearnSkillsSelector && (
-          <SkillsSelector
-            onSkillsSelect={(skill) => handleAddSkill(skill, false)}
-          />
-        )}
-      </div>
+      <h2 className="text-center my-4 fade-in">Matched Users</h2>
 
-      <h2 className="text-center my-4">Matched Users</h2>
-
-      {/* Skill Level Filter Dropdown */}
-      <Dropdown className="mb-4">
+      <Dropdown className="mb-4 fade-in">
         <Dropdown.Toggle variant="secondary" id="dropdown-basic">
           Filter by Skill Level: {skillLevelFilter || 'All Levels'}
         </Dropdown.Toggle>
@@ -211,33 +244,61 @@ const UserProfile = () => {
       </Dropdown>
 
       {filteredMatchedUsers.length > 0 ? (
-        <div className="user-list">
+        <div className="row">
           {filteredMatchedUsers.map((user) => (
-            <div className="user-card" key={user._id}>
-              <h5 className="user-title">{user.username}</h5>
-              {user.profilePicture && (
-                <Image
-                  src={user.profilePicture}
-                  roundedCircle
-                  style={{ width: '75px', height: '75px' }}
-                  alt={`${user.username}'s profile`}
-                />
-              )}
-              {renderSkills(user.skillsToTeach, 'Skills to Teach', true)}
-              {renderSkills(user.skillsToLearn, 'Skills to Learn', false)}
+            <div className="col-md-6 col-lg-4 mb-4 fade-in" key={user._id}>
+              <Card className="shadow-lg h-100 user-card">
+                <Card.Body>
+                  {/* User Title */}
+                  <h5 className="user-title">{user.username}</h5>
 
-              <Button variant="primary" onClick={() => navigate(`/messages/${user.userId}`)}>
-                Message
-              </Button>
-              <Button variant="secondary" onClick={() => console.log(`Request sent to ${user._id}`)}>
-                Send Request
-              </Button>
+                  {/* Profile Picture or Placeholder */}
+                  <div className="text-center mb-3">
+                    {user.profilePicture ? (
+                      <Image
+                        src={user.profilePicture}
+                        roundedCircle
+                        className="profile-picture"
+                        style={{ width: '75px', height: '75px' }}
+                        alt={`${user.username}'s profile`}
+                      />
+                    ) : (
+                      <div className="placeholder-profile" style={{ width: '75px', height: '75px', borderRadius: '50%', backgroundColor: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <FaUserCircle size={40} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Render User Skills */}
+                  {renderSkills(user.skillsToTeach, 'Skills to Teach', true)}
+                  {renderSkills(user.skillsToLearn, 'Skills to Learn', false)}
+
+                  {/* Action Buttons */}
+                  <div className="d-flex justify-content-between mt-3">
+                    <Button
+                      variant="primary"
+                      onClick={() => navigate(`/messages/${user.userId}/${user.username}`)}
+                    >
+                      Message
+                    </Button>
+                    <OverlayTrigger placement="top" overlay={<Tooltip>Send Skill Exchange Request</Tooltip>}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => console.log(`Request sent to ${user._id}`)}
+                      >
+                        Send Request
+                      </Button>
+                    </OverlayTrigger>
+                  </div>
+                </Card.Body>
+              </Card>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-center">No matched users found.</p>
+        <p className="text-center fade-in">No matched users found.</p>
       )}
+
     </div>
   );
 };

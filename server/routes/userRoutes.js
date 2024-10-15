@@ -2,6 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Route to get matched users by user ID
 router.get('/match/:id', async (req, res) => {
@@ -91,6 +95,7 @@ router.get('/match/:id', async (req, res) => {
     // Prepare the response
     const response = {
       currentUser: {
+        userId:currentUser._id,
         username: currentUser.username,
         profilePicture: currentUser.profilePicture,
         skillsToTeach: currentUser.skillsToTeach,
@@ -156,6 +161,57 @@ router.put('/users/:userId/skills', async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+router.post('/fetch-gemini', async (req, res) => {
+  const { prompt } = req.body; // Get prompt from request body
+
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required' });
+  }
+
+  try {
+    const result = await model.generateContent(prompt);
+    console.log(result.response); // Log response for debugging
+    res.json({ text: result.response.text() }); // Send the response text back to the frontend
+  } catch (err) {
+    console.error('Error fetching data from Gemini model:', err);
+    res.status(500).json({ error: 'Failed to fetch data from the Gemini model' });
+  }
+});
+
+
+// Update verification status of a teaching skill
+router.put('/verify-teaching-skill', async (req, res) => {
+    const { userId, skill } = req.body;
+    console.log({ userId, skill });
+    try {
+        // Find the user by userId
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Find the skill in the skillsToTeach array
+        const skillToTeach = user.skillsToTeach.find(item => item.skill === skill);
+
+        if (!skillToTeach) {
+            return res.status(404).json({ message: 'Skill not found in teaching skills' });
+        }
+
+        // Update the verified_status
+        skillToTeach.verified_status = 'verified';
+
+        // Save the updated user document
+        await user.save();
+
+        res.status(200).json({ message: 'Teaching skill verification status updated successfully' });
+    } catch (error) {
+        console.error('Error updating verification status:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 
 module.exports = router;

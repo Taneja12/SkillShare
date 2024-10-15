@@ -23,7 +23,7 @@ const Home = () => {
             </>
           )}
           {isAuthenticated && (
-            <Link to="/dashboard" className="btn btn-primary">Go to Dashboard</Link>
+            <Link to="/profile/:userid" className="btn btn-primary">Go to Profile</Link>
           )}
         </div>
       </header>

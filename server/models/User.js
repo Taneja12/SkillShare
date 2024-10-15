@@ -33,6 +33,7 @@ const UserSchema = new mongoose.Schema({
     elaboration: { type: String, required: true },
     level: { type: String, enum: ['beginner', 'intermediate', 'expert'], required: true }, // Skill level
     category: { type: String, default: null }, // Optional: skill category
+    verified_status: {type: String, enum:['verified', 'not verified'], default:'not verified'},
   }],
   skillsToLearn: [{
     skill: { type: String, required: true },

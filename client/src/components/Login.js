@@ -78,12 +78,31 @@ const Login = () => {
       }
     }
   };
-  
+
+  // Inline styles for custom CSS integration
+  const containerStyle = {
+    backgroundColor: '#5C63FF',
+    minHeight: '100vh',
+  };
+
+  const cardStyle = {
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  };
+
+  const linkStyle = {
+    color: '#5C63FF',
+  };
+
+  const buttonStyle = {
+    backgroundColor: '#5C63FF',
+    border: 'none',
+  };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div className="container d-flex justify-content-center align-items-center" style={containerStyle}>
       <div className="col-md-4">
-        <div className="card p-4 shadow-sm">
+        <div className="card p-4 shadow-sm" style={cardStyle}>
           <h2 className="text-center mb-4">Login</h2>
 
           {/* Display error dynamically */}
@@ -122,7 +141,12 @@ const Login = () => {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+            <button
+              type="submit"
+              className="btn btn-primary w-100"
+              disabled={loading}
+              style={buttonStyle}
+            >
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
@@ -137,7 +161,7 @@ const Login = () => {
             />
 
             <p>
-              Don't have an account? <Link to="/register">Sign Up</Link>
+              Don't have an account? <Link to="/register" style={linkStyle}>Sign Up</Link>
             </p>
           </div>
         </div>

@@ -1,0 +1,41 @@
+.custom-navbar {
+  background-color: #e6f0f1; /* Light background */
+  border: none; /* Remove borders */
+  padding: 10px 20px; /* Add padding */
+}
+
+.navbar-brand {
+  font-weight: bold; /* Make brand text bold */
+}
+
+.logo {
+  font-size: 30px; /* Logo size */
+  font-weight: bold;
+  color: #000; /* Color of the logo */
+}
+
+.skill-share {
+  font-size: 20px; /* Size of "Skill Share" text */
+  color: #000; /* Color of the "Skill Share" text */
+}
+
+.nav-link {
+  color: #000; /* Color for nav links */
+  font-size: 18px; /* Font size for nav links */
+}
+
+.nav-link:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+.login-button {
+  font-weight: bold; /* Make login button bold */
+  border: 1px solid #000; /* Add border for the login button */
+  border-radius: 4px; /* Rounded corners for the button */
+  padding: 5px 10px; /* Padding for the button */
+  color: #000; /* Text color */
+}
+
+.login-button:hover {
+  background-color: #f0f0f0; /* Background color on hover */
+}

@@ -112,7 +112,7 @@ const Register = () => {
       skillsToLearn: skillsToLearn.map(skill => ({
         skill,
         elaboration: skillsDescription.learning || '',
-        desiredLevel: learningLevels[skill] || 'beginner', // Default to 'beginner'
+        level: learningLevels[skill] || 'beginner', // Default to 'beginner'
       })),
     };
 
