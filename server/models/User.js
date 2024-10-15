@@ -4,7 +4,9 @@ const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true,
+    required: function () {
+      return !this.googleId; // Required if not signing up via Google
+    },
     unique: true,
     trim: true,
   },
@@ -17,8 +19,14 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: function () {
+      return !this.googleId; // Required if not signing up via Google
+    },
     minlength: 6,
+  },
+  googleId: {
+    type: String, // Only set when signing up via Google
+    default: null,
   },
   skillsToTeach: [{
     skill: { type: String, required: true },
@@ -29,7 +37,7 @@ const UserSchema = new mongoose.Schema({
   skillsToLearn: [{
     skill: { type: String, required: true },
     elaboration: { type: String, required: true },
-    desiredLevel: { type: String, enum: ['beginner', 'intermediate', 'expert'], required: true }, // Desired skill level
+    level: { type: String, enum: ['beginner', 'intermediate', 'expert'], required: true }, // Desired skill level
     category: { type: String, default: null }, // Optional: skill category
   }],
   role: {

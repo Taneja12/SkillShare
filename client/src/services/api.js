@@ -37,6 +37,53 @@ export const loginUser = async (formData) => {
   }
 };
 
+
+
+export const googleSignUpUser = async ({ token }) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/google-signup`, { token });
+    return response.data; // Return the response data
+  } catch (error) {
+    // Handle errors based on the response
+    if (error.response) {
+      // The request was made, and the server responded with a status code
+      // that falls out of the range of 2xx
+      const errorMessage = error.response.data.error || 'An unexpected error occurred during sign-up. Please try again.';
+      throw new Error(errorMessage);
+    } else if (error.request) {
+      // The request was made but no response was received
+      throw new Error('No response received from the server. Please try again later.');
+    } else {
+      // Something happened in setting up the request that triggered an error
+      throw new Error('Error in setting up the sign-up request. Please try again.');
+    }
+  }
+};
+
+// Function to handle Google login
+export const googleLoginUser = async ({ token }) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/google-login`, { token });
+    return response.data; // Return the response data
+  } catch (error) {
+    // Handle errors based on the response
+    if (error.response) {
+      // The request was made, and the server responded with a status code
+      // that falls out of the range of 2xx
+      const errorMessage = error.response.data.error || 'An unexpected error occurred during login. Please try again.';
+      throw new Error(errorMessage);
+    } else if (error.request) {
+      // The request was made but no response was received
+      throw new Error('No response received from the server. Please try again later.');
+    } else {
+      // Something happened in setting up the request that triggered an error
+      throw new Error('Error in setting up the login request. Please try again.');
+    }
+  }
+};
+
+
+
 // Fetch chat history
 export const getChatHistory = async (currentUserId, userId) => {
   try {
@@ -82,6 +129,7 @@ export const fetchMatchedUsers = async (userId) => {
 };
 
 export const uploadProfilePicture = async (file, userId) => {
+  console.log(userId);
   const formData = new FormData();
   formData.append('image', file); // File upload using key 'image'
   formData.append('userId', userId); // Send userId along with the image
@@ -113,4 +161,18 @@ export const generateGoogleMeetLink = async (hostEmail) => {
 
 export const initiateGoogleAuth = async () => {
   window.location.href = `${API_URL}/meet/auth/google`; // Redirect to your backend auth route
+};
+
+
+export const updateSkills = async (userId, updatedSkills, isTeaching) => {
+  try {
+    const endpoint = isTeaching ? 'skillsToTeach' : 'skillsToLearn';
+    const response = await axios.put(`${API_URL}/users/${userId}/skills`, {
+      [endpoint]: updatedSkills,
+    });
+    return response.data; // The updated user data
+  } catch (error) {
+    console.error('Error updating skills:', error);
+    throw error; // Rethrow error to be handled by the caller
+  }
 };

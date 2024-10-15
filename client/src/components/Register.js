@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { registerUser } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { registerUser, googleSignUpUser } from '../services/api'; // Import both API functions
+import { useNavigate, Link } from 'react-router-dom';
 import Select from 'react-select';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import skillsData from './skills'; // Import the skills data
 import { useAuth } from '../Contexts/AuthContext';
+import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin component
 
 // Convert skillsData into options for React Select
 const skillCategories = Object.keys(skillsData).map(category => ({
@@ -41,6 +42,7 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError(''); // Clear error on input change
   };
 
   // Handle React-Select changes
@@ -83,7 +85,7 @@ const Register = () => {
       }
       setCurrentStep(3); // Move to Step 3
     }
-    setError('');
+    setError(''); // Clear any error messages
   };
 
   // Submit final data
@@ -93,7 +95,7 @@ const Register = () => {
 
     const { skillsDescription, skillsToTeach, skillsToLearn, teachingLevels, learningLevels } = formData;
 
-    // Check if there are any common skills between "Skills to Teach" and "Skills to Learn"
+    // Check for common skills
     const commonSkills = skillsToTeach.filter(skill => skillsToLearn.includes(skill));
     if (commonSkills.length > 0) {
       setError('You cannot select the same skill for both teaching and learning');
@@ -105,7 +107,7 @@ const Register = () => {
       skillsToTeach: skillsToTeach.map(skill => ({
         skill,
         elaboration: skillsDescription.teaching || '',
-        level: teachingLevels[skill] || 'beginner', // Default to 'beginner' if no level is set
+        level: teachingLevels[skill] || 'beginner', // Default to 'beginner'
       })),
       skillsToLearn: skillsToLearn.map(skill => ({
         skill,
@@ -131,6 +133,33 @@ const Register = () => {
     }
   };
 
+  // Google Sign-Up
+  const handleGoogleSignUp = async (response) => {
+    try {
+        const result = await googleSignUpUser({ token: response.credential });
+        if (result && result.token) {
+            login(result.token); // Store the token in context
+            setFormData(prev => ({
+                ...prev,
+                username: result.userId, // or result.username if available
+            }));
+            setCurrentStep(2); // Move to the next step of registration
+        } else {
+            setError('Google sign-in failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Google sign-in error:', error);
+        if (error.message.includes("User already exists")) {
+            setError('User already exists. Please log in.'); // Handle existing user error
+        } else if (error.message.includes("User not found")) {
+            setError('No account found with this Google ID. Please sign up first.');
+        } else {
+            setError('Google sign-in failed. Please try again.');
+        }
+    }
+};
+
+
   // Render form steps dynamically
   const renderFormStep = () => {
     if (currentStep === 1) {
@@ -138,13 +167,14 @@ const Register = () => {
         <>
           {['username', 'email', 'password', 'confirmPassword'].map((field) => (
             <div className="form-group mb-2" key={field}>
+              <label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
               <input
                 type={field.includes('password') ? 'password' : 'text'}
                 name={field}
                 value={formData[field]}
                 onChange={handleChange}
                 className="form-control"
-                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                placeholder={`Enter your ${field}`}
                 required
               />
             </div>
@@ -225,77 +255,66 @@ const Register = () => {
                 skillsDescription: { ...prev.skillsDescription, learning: e.target.value }
               }))}
               className="form-control"
-              placeholder="Describe your learning skills"
+              placeholder="Describe your learning interests"
             />
-          </div>
-          <div className="mb-2">
-            <h6>Select Skill Levels for Skills to Teach:</h6>
-            {formData.skillsToTeach.map(skill => (
-              <div key={skill} className="mb-2">
-                <label>{skill}</label>
-                <Select
-                  options={skillLevels}
-                  classNamePrefix="select"
-                  onChange={(option) => handleLevelChange(skill, option.value, 'teachingLevels')}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="mb-2">
-            <h6>Select Skill Levels for Skills to Learn:</h6>
-            {formData.skillsToLearn.map(skill => (
-              <div key={skill} className="mb-2">
-                <label>{skill}</label>
-                <Select
-                  options={skillLevels}
-                  classNamePrefix="select"
-                  onChange={(option) => handleLevelChange(skill, option.value, 'learningLevels')}
-                />
-              </div>
-            ))}
           </div>
           <button type="submit" className="btn btn-primary w-100 mt-2">Next</button>
         </>
       );
     }
 
-    return (
-      <>
-        <h5>Skills to Teach:</h5>
-        {formData.skillsToTeach.length > 0 ? (
-          <ul>
-            {formData.skillsToTeach.map((skill, index) => <li key={index}>{skill}</li>)}
-          </ul>
-        ) : (
-          <p>No skills selected.</p>
-        )}
-
-        <h5>Skills to Learn:</h5>
-        {formData.skillsToLearn.length > 0 ? (
-          <ul>
-            {formData.skillsToLearn.map((skill, index) => <li key={index}>{skill}</li>)}
-          </ul>
-        ) : (
-          <p>No skills selected.</p>
-        )}
-
-        <div className="d-flex justify-content-between mt-3">
-          <button type="button" className="btn btn-secondary" onClick={() => setCurrentStep(2)}>Previous</button>
-          <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Register</button>
-        </div>
-      </>
-    );
+    if (currentStep === 3) {
+      return (
+        <>
+          <div className="mb-2">
+            <h5>Select Teaching Levels:</h5>
+            {formData.skillsToTeach.map((skill, index) => (
+              <div key={index} className="mb-1">
+                <label>{skill}</label>
+                <Select
+                  options={skillLevels}
+                  onChange={(option) => handleLevelChange(skill, option.value, 'teachingLevels')}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="mb-2">
+            <h5>Select Learning Levels:</h5>
+            {formData.skillsToLearn.map((skill, index) => (
+              <div key={index} className="mb-1">
+                <label>{skill}</label>
+                <Select
+                  options={skillLevels}
+                  onChange={(option) => handleLevelChange(skill, option.value, 'learningLevels')}
+                />
+              </div>
+            ))}
+          </div>
+          <button type="submit" className="btn btn-primary w-100 mt-2">Register</button>
+        </>
+      );
+    }
   };
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
-      <div className="col-md-6">
+      <div className="col-md-4">
         <div className="card p-4 shadow-sm">
-          <h2 className="text-center mb-4">Register - Step {currentStep}</h2>
+          <h2 className="text-center mb-4">Sign Up</h2>
           {error && <div className="alert alert-danger">{error}</div>}
-          <form onSubmit={handleNextStep}>
+          <form onSubmit={currentStep === 3 ? handleSubmit : handleNextStep}>
             {renderFormStep()}
           </form>
+          <div className="text-center mt-3">
+            <p>or</p>
+            <GoogleLogin
+              onSuccess={handleGoogleSignUp}
+              onError={() => setError('Google sign-in failed. Please try again.')}
+            />
+            <p>
+              Already have an account? <Link to="/login">Login</Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

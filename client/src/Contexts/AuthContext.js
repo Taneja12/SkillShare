@@ -21,29 +21,37 @@ export const AuthProvider = ({ children }) => {
       return true; // If error occurs, consider it expired
     }
   };
-
   const login = (token) => {
+    console.log('Logging in with token:', token);
     localStorage.setItem('token', token); // Save the token
     setIsAuthenticated(true);
-    setCurrentUser(jwtDecode(token)); // Decode the token and set current user
+    const decodedUser = jwtDecode(token);
+    console.log('Decoded user:', decodedUser);
+    setCurrentUser(decodedUser); // Decode the token and set current user
   };
-
+  
   const logout = () => {
+    console.log('Logging out');
     localStorage.removeItem('token');
     setIsAuthenticated(false);
     setCurrentUser(null); // Clear current user on logout
   };
-
+  
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token && !checkTokenExpiration(token)) {
-      setIsAuthenticated(true);
-      const decodedUser = jwtDecode(token); // Decode token and set user if valid
-      setCurrentUser(decodedUser);
+    if (token) {
+      if (!checkTokenExpiration(token)) {
+        setIsAuthenticated(true);
+        const decodedUser = jwtDecode(token); // Decode token and set user if valid
+        setCurrentUser(decodedUser);
+      } else {
+        logout(); // Automatically log out if the token is expired
+      }
     } else {
-      logout(); // Automatically log out if the token is expired
+      logout(); // Automatically log out if no token exists
     }
   }, []);
+  
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, currentUser, login, logout }}>

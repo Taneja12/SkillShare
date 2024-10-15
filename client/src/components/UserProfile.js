@@ -1,20 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../Contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Spinner, Button, Image } from 'react-bootstrap'; // Import Bootstrap components
-import { FaUserCircle } from 'react-icons/fa'; // Import profile icon
-import '../css/UserProfle.css'; // Your custom CSS
-import { fetchMatchedUsers, uploadProfilePicture } from '../services/api'; // Import API functions
+import { Spinner, Button, Image, Dropdown } from 'react-bootstrap';
+import { FaUserCircle } from 'react-icons/fa';
+import '../css/UserProfle.css';
+import { fetchMatchedUsers, uploadProfilePicture, updateSkills } from '../services/api'; // Update API
+import SkillsSelector from './SkillsSelector'; // Import the SkillsSelector component
 
 const UserProfile = () => {
   const { currentUser } = useAuth();
   const [matchedUsers, setMatchedUsers] = useState([]);
   const [currentUserDetails, setCurrentUserDetails] = useState({});
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false); // Add state for uploading
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [showTeachSkillsSelector, setShowTeachSkillsSelector] = useState(false); // Toggle for skills to teach
+  const [showLearnSkillsSelector, setShowLearnSkillsSelector] = useState(false); // Toggle for skills to learn
+  const [skillLevelFilter, setSkillLevelFilter] = useState(''); // New state for filter
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,7 +42,6 @@ const UserProfile = () => {
     fetchUserData();
   }, [currentUser]);
 
-  // Handle file selection and upload
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setSelectedFile(file);
@@ -47,20 +50,50 @@ const UserProfile = () => {
 
   const handleImageUpload = async (file) => {
     if (file && currentUser) {
-      setUploading(true); // Show spinner during upload
+      setUploading(true); 
       try {
         const result = await uploadProfilePicture(file, currentUser.userId);
         setProfilePicture(result.url);
-        console.log('Image uploaded successfully:', result.url);
       } catch (error) {
         console.error('Error uploading image:', error);
       } finally {
-        setUploading(false); // Hide spinner after upload
+        setUploading(false);
       }
-    } else {
-      console.error('No file selected or user not found');
     }
   };
+
+  const handleAddSkill = async (skill, isTeaching) => {
+    const updatedSkills = isTeaching
+      ? [...currentUserDetails.skillsToTeach, skill]
+      : [...currentUserDetails.skillsToLearn, skill];
+  
+    try {
+      await updateSkills(currentUser.userId, updatedSkills, isTeaching);
+  
+      if (isTeaching) {
+        setCurrentUserDetails({
+          ...currentUserDetails,
+          skillsToTeach: updatedSkills,
+        });
+      } else {
+        setCurrentUserDetails({
+          ...currentUserDetails,
+          skillsToLearn: updatedSkills,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating skills:', error);
+    }
+  };
+  
+  const handleFilterChange = (level) => {
+    setSkillLevelFilter(level);
+  };
+
+  // Filter matched users based on selected skill level filter
+  const filteredMatchedUsers = matchedUsers.filter(user =>
+    user.skillsToTeach.some(skill => skill.level === skillLevelFilter || skillLevelFilter === '')
+  );
 
   const renderSkills = useCallback(
     (skills, title, isTeaching) => (
@@ -69,7 +102,7 @@ const UserProfile = () => {
         {Array.isArray(skills) && skills.length > 0 ? (
           <ul>
             {skills.map((skillObj, index) => (
-              <li key={`${title}-${index}-${skillObj.skill || skillObj.id}`}>
+              <li key={`${title}-${index}-${skillObj.skill}`}>
                 <strong>{skillObj.skill}</strong> - {skillObj.elaboration || 'No elaboration provided'}
                 {isTeaching ? (
                   <span>{skillObj.level ? ` (Level: ${skillObj.level})` : ''}</span>
@@ -84,24 +117,6 @@ const UserProfile = () => {
         )}
       </>
     ),
-    []
-  );
-
-  const handleMessageClick = useCallback(
-    (userId) => {
-      if (userId) {
-        navigate(`/messages/${userId}`);
-      } else {
-        console.error('Invalid userId for messaging.');
-      }
-    },
-    [navigate]
-  );
-
-  const handleSendRequestClick = useCallback(
-    (userId) => {
-      console.log(`Request sent to user with ID: ${userId}`);
-    },
     []
   );
 
@@ -127,48 +142,77 @@ const UserProfile = () => {
       <div className="user-info mb-4">
         <h5>User ID: {currentUser ? currentUser.userId : 'No user available'}</h5>
 
-        {/* Profile Picture with hover effect and spinner */}
+        {/* Profile Picture */}
         <div className="profile-picture-wrapper" onClick={() => document.getElementById('fileInput').click()}>
-  {uploading && (
-    <div className="spinner-overlay">
-      <Spinner animation="border" role="status" className="profile-spinner">
-        <span className="visually-hidden">Uploading...</span>
-      </Spinner>
-    </div>
-  )}
-  {profilePicture ? (
-    <Image
-      src={profilePicture}
-      roundedCircle
-      className="profile-picture"
-      style={{ width: '100px', height: '100px' }}
-    />
-  ) : (
-    <FaUserCircle size={100} className="profile-icon" />
-  )}
-  
-  {/* Click to upload text */}
-  <div className="upload-text">Click to upload</div>
-  
-  <input
-    id="fileInput"
-    type="file"
-    accept="image/*"
-    style={{ display: 'none' }}
-    onChange={handleFileChange}
-  />
-</div>
+          {uploading && (
+            <div className="spinner-overlay">
+              <Spinner animation="border" role="status" className="profile-spinner">
+                <span className="visually-hidden">Uploading...</span>
+              </Spinner>
+            </div>
+          )}
+          {profilePicture ? (
+            <Image
+              src={profilePicture}
+              roundedCircle
+              className="profile-picture"
+              style={{ width: '100px', height: '100px' }}
+            />
+          ) : (
+            <FaUserCircle size={100} className="profile-icon" />
+          )}
+          <div className="upload-text">Click to upload</div>
+          <input
+            id="fileInput"
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+        </div>
 
-
+        {/* Display and Edit Skills to Teach */}
         {renderSkills(currentUserDetails.skillsToTeach, 'Skills to Teach', true)}
+        <Button onClick={() => setShowTeachSkillsSelector(!showTeachSkillsSelector)}>
+          {showTeachSkillsSelector ? 'Cancel' : 'Add Skills to Teach'}
+        </Button>
+        {showTeachSkillsSelector && (
+          <SkillsSelector
+            onSkillsSelect={(skill) => handleAddSkill(skill, true)}
+          />
+        )}
+
+        {/* Display and Edit Skills to Learn */}
         {renderSkills(currentUserDetails.skillsToLearn, 'Skills to Learn', false)}
+        <Button onClick={() => setShowLearnSkillsSelector(!showLearnSkillsSelector)}>
+          {showLearnSkillsSelector ? 'Cancel' : 'Add Skills to Learn'}
+        </Button>
+        {showLearnSkillsSelector && (
+          <SkillsSelector
+            onSkillsSelect={(skill) => handleAddSkill(skill, false)}
+          />
+        )}
       </div>
 
       <h2 className="text-center my-4">Matched Users</h2>
 
-      {matchedUsers.length > 0 ? (
+      {/* Skill Level Filter Dropdown */}
+      <Dropdown className="mb-4">
+        <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+          Filter by Skill Level: {skillLevelFilter || 'All Levels'}
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={() => handleFilterChange('')}>All Levels</Dropdown.Item>
+          <Dropdown.Item onClick={() => handleFilterChange('beginner')}>Beginner</Dropdown.Item>
+          <Dropdown.Item onClick={() => handleFilterChange('intermediate')}>Intermediate</Dropdown.Item>
+          <Dropdown.Item onClick={() => handleFilterChange('expert')}>Expert</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+
+      {filteredMatchedUsers.length > 0 ? (
         <div className="user-list">
-          {matchedUsers.map((user) => (
+          {filteredMatchedUsers.map((user) => (
             <div className="user-card" key={user._id}>
               <h5 className="user-title">{user.username}</h5>
               {user.profilePicture && (
@@ -182,13 +226,10 @@ const UserProfile = () => {
               {renderSkills(user.skillsToTeach, 'Skills to Teach', true)}
               {renderSkills(user.skillsToLearn, 'Skills to Learn', false)}
 
-              {user.interests && <p>Interests: {user.interests.join(', ')}</p>}
-              {user.description && <p>Description: {user.description}</p>}
-
-              <Button variant="primary" onClick={() => handleMessageClick(user.userId)}>
+              <Button variant="primary" onClick={() => navigate(`/messages/${user.userId}`)}>
                 Message
               </Button>
-              <Button variant="secondary" onClick={() => handleSendRequestClick(user._id)}>
+              <Button variant="secondary" onClick={() => console.log(`Request sent to ${user._id}`)}>
                 Send Request
               </Button>
             </div>
