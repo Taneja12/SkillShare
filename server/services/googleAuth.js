@@ -2,9 +2,9 @@ const { google } = require('googleapis');
 require('dotenv').config();
 
 const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI  // Redirect URI from .env
+  process.env.GOOGLE_CALENDAR_CLIENT_ID,
+  process.env.GOOGLE_CALENDAR_CLIENT_SECRET,
+  process.env.GOOGLE_CALENDAR_REDIRECT_URI  // Redirect URI from .env
 );
 
 // Generate Google OAuth URL with explicit redirect_uri
@@ -12,7 +12,7 @@ function generateAuthUrl() {
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: ['https://www.googleapis.com/auth/calendar.events'],
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI  // Ensure redirect_uri is included here
+    redirect_uri: process.env.GOOGLE_CALENDAR_REDIRECT_URI  // Ensure redirect_uri is included here
   });
 }
 
@@ -20,7 +20,7 @@ function generateAuthUrl() {
 async function handleGoogleCallback(code) {
   const { tokens } = await oauth2Client.getToken({
     code,
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI  // Explicitly pass the redirect_uri here as well
+    redirect_uri: process.env.GOOGLE_CALENDAR_REDIRECT_URI  // Explicitly pass the redirect_uri here as well
   });
   oauth2Client.setCredentials(tokens);
   return tokens;
