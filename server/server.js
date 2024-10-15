@@ -63,7 +63,7 @@ app.use('/api', userRoutes);
 app.use('/api/chat', chatRoutes);
 // app.use('/api/request', requestRoutes);
 app.use('/api/upload', uploadRoutes);
-// app.use('/api/meet', meetRoutes);
+app.use('/api/meet', meetRoutes);
 
 // Socket.IO Logic
 io.on('connection', (socket) => {
