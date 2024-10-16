@@ -6,12 +6,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/Chat.css';
 import { getChatHistory, generateGoogleMeetLink, initiateGoogleAuth } from '../services/api';
 
-const API_URL = 'https://skillshare-p28w.onrender.com'; 
+const API_URL = 'https://skillshare-p28w.onrender.com';
 
 let socket; // Move socket initialization here
 
 const Chat = () => {
-    const { userId,username } = useParams();
+    const { userId, username } = useParams();
     const { currentUser } = useAuth();
     const [messages, setMessages] = useState([]);
     const [messageContent, setMessageContent] = useState('');
@@ -121,25 +121,27 @@ const Chat = () => {
     return (
         <div className="chat-container container mt-5">
             <h3 className="text-center mb-4">Chat with {username}</h3>
-            <div
-                className="chat-box border p-3 rounded"
-                style={{ maxHeight: '400px', overflowY: 'auto' }}
-                ref={chatBoxRef}
-            >
+            <div className="chat-box border p-3 rounded" style={{ maxHeight: '400px', overflowY: 'auto' }} ref={chatBoxRef}>
                 {messages.length > 0 ? (
                     messages.map((msg) => (
-                        <div
-                            key={msg._id}
-                            className={`chat-message ${msg.sender === currentUser.userId ? 'my-message' : 'other-message'}`}
-                        >
+                        <div key={msg._id} className={`chat-message ${msg.sender === currentUser.userId ? 'my-message' : 'other-message'}`}>
                             <div className="chat-bubble">
                                 <strong>{msg.sender === currentUser.userId ? 'You' : msg.senderUsername}</strong>
                                 : {msg.content.includes('Google Meet Link') ? (
-                                    <a href={msg.content.split('Google Meet Link: ')[1]} target="_blank" rel="noopener noreferrer">
+                                    <a href={msg.content.match(/https?:\/\/[^\s]+/g)} target="_blank" rel="noopener noreferrer">
                                         Join Meet
                                     </a>
                                 ) : (
-                                    msg.content
+                                    // Use a regex to identify any URLs in the message content and make them clickable
+                                    msg.content.split(' ').map((word, index) =>
+                                        word.match(/https?:\/\/[^\s]+/g) ? (
+                                            <a key={index} href={word} target="_blank" rel="noopener noreferrer">
+                                                {word}
+                                            </a>
+                                        ) : (
+                                            <span key={index}>{word} </span>
+                                        )
+                                    )
                                 )}
                                 <small className="text-muted d-block">
                                     {new Date(msg.timestamp).toLocaleString()}
@@ -151,6 +153,7 @@ const Chat = () => {
                     <p className="text-center text-muted">No messages yet.</p>
                 )}
             </div>
+
 
             <form onSubmit={handleSendMessage} className="d-flex mt-3">
                 <input

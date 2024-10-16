@@ -9,7 +9,7 @@ const SkillsSelector = ({ onSkillsSelect }) => {
   const [elaboration, setElaboration] = useState('');
   const [level, setLevel] = useState('');
   const [showAlert, setShowAlert] = useState(false);
-  const [fadeIn, setFadeIn] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
 
   const skillLevels = ['beginner', 'intermediate', 'expert'];
 
@@ -41,16 +41,18 @@ const SkillsSelector = ({ onSkillsSelect }) => {
         category: selectedCategory,
       };
 
-      // console.log('Adding skill:', skillObject);
       onSkillsSelect(skillObject);
-      setShowAlert(false); // Show success alert
-      setFadeIn(true); // Reset fade for animation
+      setShowAlert(true);
+      setFadeIn(true);
 
-      // Clear inputs
+      // Clear inputs after adding the skill
       setSelectedSkill('');
       setElaboration('');
       setLevel('');
       setSelectedCategory('');
+
+      // Hide alert after a short delay
+      setTimeout(() => setFadeIn(false), 3000);
     }
   };
 
@@ -62,7 +64,9 @@ const SkillsSelector = ({ onSkillsSelect }) => {
           <Form.Control as="select" value={selectedCategory} onChange={handleCategoryChange}>
             <option value="">Select a category</option>
             {Object.keys(skillsData).map((category) => (
-              <option key={category} value={category}>{category}</option>
+              <option key={category} value={category}>
+                {category}
+              </option>
             ))}
           </Form.Control>
         </Form.Group>
@@ -73,7 +77,9 @@ const SkillsSelector = ({ onSkillsSelect }) => {
             <Form.Control as="select" value={selectedSkill} onChange={handleSkillChange}>
               <option value="">Select a skill</option>
               {skillsData[selectedCategory].map((skill) => (
-                <option key={skill} value={skill}>{skill}</option>
+                <option key={skill} value={skill}>
+                  {skill}
+                </option>
               ))}
             </Form.Control>
           </Form.Group>
@@ -94,23 +100,26 @@ const SkillsSelector = ({ onSkillsSelect }) => {
           <Form.Control as="select" value={level} onChange={handleLevelChange}>
             <option value="">Select a level</option>
             {skillLevels.map((lvl) => (
-              <option key={lvl} value={lvl}>{lvl}</option>
+              <option key={lvl} value={lvl}>
+                {lvl}
+              </option>
             ))}
           </Form.Control>
         </Form.Group>
 
-        <Fade in={fadeIn}>
-          <Button
-            variant="primary"
-            onClick={handleAddSkill}
-            disabled={!selectedSkill || !elaboration || !level}
-            onMouseEnter={() => setFadeIn(false)} // Reset fade on hover
-          >
-            Add Skill
-          </Button>
-        </Fade>
+        <Button
+          variant="primary"
+          onClick={handleAddSkill}
+          disabled={!selectedSkill || !elaboration || !level}
+        >
+          Add Skill
+        </Button>
 
-        
+        <Fade in={fadeIn}>
+          <Alert variant="success" className="mt-3">
+            Skill added successfully!
+          </Alert>
+        </Fade>
       </Form>
     </div>
   );
