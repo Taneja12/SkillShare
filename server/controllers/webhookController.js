@@ -15,9 +15,9 @@ exports.handleWebhook = async (req, res) => {
     }
 
     const { order_id } = payload.data.order;
-    const { cf_payment_id, payment_status, amount } = payload.data.payment;
+    const { cf_payment_id, payment_status, order_amount } = payload.data.payment;
 
-    if (!order_id || !cf_payment_id || !payment_status || !amount) {
+    if (!order_id || !cf_payment_id || !payment_status || !order_amount) {
       console.error('Missing required fields:', payload);
       return res.status(400).send('Missing required fields');
     }
@@ -38,11 +38,11 @@ exports.handleWebhook = async (req, res) => {
     let subscriptionPlan = null;
     let subscriptionEndDate = null;
 
-    if (amount === 49) {
+    if (order_amount === 49) {
       subscriptionPlan = 'monthly';
       subscriptionEndDate = new Date();
       subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1); // 1 month from today
-    } else if (amount === 499) {
+    } else if (order_amount === 499) {
       subscriptionPlan = 'yearly';
       subscriptionEndDate = new Date();
       subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1); // 1 year from today
