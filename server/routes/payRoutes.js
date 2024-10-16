@@ -82,13 +82,12 @@ router.post('/webhook', handleWebhook);
 
 router.post('/new', async (req, res) => {
   try {
-    const { sessionId, userId, orderId } = req.body;
-    console.log({ sessionId, userId,orderId })
-    console.log(orderId);
+    const { sessionId, userId,OrderId } = req.body;
+    console.log(OrderId);
     const order = new Order({
       sessionId,
       userId,
-      orderId,
+      OrderId,
       createdAt:moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'), // Set createdAt manually to current date/time
     });
 
@@ -101,20 +100,9 @@ router.post('/new', async (req, res) => {
   }
 });
 
-router.get('/user/:userId', async (req, res) => {
-  const { userId } = req.params;
 
-  try {
-    const orders = await Order.find({ userId }).populate('cartItems.bookId');
-    res.json(orders);
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-    res.status(500).json({ error: 'Failed to fetch orders' });
-  }
-});
 
 module.exports = router;
-
 
 
 

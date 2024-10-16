@@ -178,12 +178,12 @@ export const updateSkills = async (userId, updatedSkills, isTeaching) => {
 };
 
 
-export const createOrder = async (sessionId, userId, orderId) => {
+export const createOrder = async (sessionId, userId, OrderId) => {
   try {
     const response = await axios.post(`${API_URL}/orders/new`, {
-      sessionId: sessionId,
-      userId: userId,
-      orderId: orderId, // Correct key here (changed from OrderId to orderId)
+      sessionId,
+      userId,
+      OrderId, // Correct key here (changed from OrderId to orderId)
     });
     return response.data;
   } catch (error) {
