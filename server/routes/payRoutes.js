@@ -83,6 +83,7 @@ router.post('/webhook', handleWebhook);
 router.post('/new', async (req, res) => {
   try {
     const { sessionId, userId, OrderId } = req.body;
+    console.log({ sessionId, userId, OrderId })
     console.log(OrderId);
     const order = new Order({
       sessionId,
