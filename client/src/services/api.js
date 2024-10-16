@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Update the backend URL to the Render deployment
-const API_URL = 'https://skillshare-p28w.onrender.com/api';
+const API_URL = 'http://localhost:5000/api';
 
 export const registerUser = async (userData) => {
   try {
@@ -180,7 +180,6 @@ export const updateSkills = async (userId, updatedSkills, isTeaching) => {
 
 export const createOrder = async (sessionId, userId, orderId) => {
   try {
-    console.log(orderId);
     const response = await axios.post(`${API_URL}/orders/new`, {
       sessionId: sessionId,
       userId: userId,

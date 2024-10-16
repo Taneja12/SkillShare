@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
     ref: 'User', // Reference to User model
     required: true 
   },
-  OrderId: {
+  orderId: {
     type: String,
     default: null,
   }, // New field for the order ID received from webhook
