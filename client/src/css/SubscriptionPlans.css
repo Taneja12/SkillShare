@@ -1,0 +1,25 @@
+.subscription-plans .plan-card {
+  border-radius: 12px;
+}
+
+.subscription-plans .plan-title {
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.subscription-plans .plan-btn {
+  background-color: #007bff;
+  border: none;
+  font-weight: 500;
+  padding: 10px;
+}
+
+.subscription-plans .list-group-item {
+  background: transparent;
+  border: none;
+  padding-left: 0;
+}
+
+.plan-btn:hover {
+  background-color: #0056b3;
+}

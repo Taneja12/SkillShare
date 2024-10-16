@@ -4,6 +4,8 @@ import { loginUser, googleLoginUser } from '../services/api';
 import { useAuth } from '../Contexts/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
 import 'bootstrap/dist/css/bootstrap.min.css';
+// Import the image
+import loginImage from '../static/login.webp';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -69,10 +71,7 @@ const Login = () => {
   
       // Check if the error is "User not found" and handle accordingly
       if (error.message.includes("User not found")) {
-        // Optionally redirect to signup or show a message
         setError('No account found with this Google ID. Please sign up first.');
-        // You can redirect them to the signup page if you want
-        // navigate('/register');
       } else {
         setError('An error occurred during Google login. Please try again.');
       }
@@ -81,7 +80,6 @@ const Login = () => {
 
   // Inline styles for custom CSS integration
   const containerStyle = {
-    backgroundColor: '#5C63FF',
     minHeight: '100vh',
   };
 
@@ -100,10 +98,15 @@ const Login = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={containerStyle}>
+    <div className="container d-flex justify-content-center align-items-center my-5" style={containerStyle}>
       <div className="col-md-4">
         <div className="card p-4 shadow-sm" style={cardStyle}>
           <h2 className="text-center mb-4">Login</h2>
+
+          {/* Add the image for better visual appeal */}
+          <div className="text-center mb-4">
+            <img src={loginImage} alt="Login Illustration" className="img-fluid" style={{ maxHeight: '200px' }} />
+          </div>
 
           {/* Display error dynamically */}
           {error && (
@@ -114,7 +117,6 @@ const Login = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group mb-3">
-              <label htmlFor="email">Email</label>
               <input
                 type="email"
                 className="form-control"
@@ -122,13 +124,12 @@ const Login = () => {
                 name="email"
                 value={email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder="Email"
                 required
               />
             </div>
 
             <div className="form-group mb-3">
-              <label htmlFor="password">Password</label>
               <input
                 type="password"
                 className="form-control"
@@ -136,16 +137,17 @@ const Login = () => {
                 name="password"
                 value={password}
                 onChange={handleChange}
-                placeholder="Enter your password"
+                placeholder="Password"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="btn btn-primary w-100"
+              className="btn w-100"
               disabled={loading}
-              style={buttonStyle}
+              style={{buttonStyle, backgroundColor:'#79a7ac'}}
+
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>

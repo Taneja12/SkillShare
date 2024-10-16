@@ -252,60 +252,70 @@ const UserProfile = () => {
       </Dropdown>
 
       {filteredMatchedUsers.length > 0 ? (
-        <div className="row">
-          {filteredMatchedUsers.map((user) => (
-            <div className="col-md-6 col-lg-4 mb-4 fade-in" key={user._id}>
-              <Card className="shadow-lg h-100 user-card">
-                <Card.Body>
-                  {/* User Title */}
-                  <h5 className="user-title">{user.username}</h5>
+  <div className="row">
+    {filteredMatchedUsers.map((user) => (
+      <div className="col-md-6 col-lg-4 mb-4 fade-in" key={user._id}>
+        <Card className="shadow-lg h-100 user-card">
+          <Card.Body>
+            {/* User Title */}
+            <h5 className="user-title">{user.username}</h5>
 
-                  {/* Profile Picture or Placeholder */}
-                  <div className="text-center mb-3">
-                    {user.profilePicture ? (
-                      <Image
-                        src={user.profilePicture}
-                        roundedCircle
-                        className="profile-picture"
-                        style={{ width: '75px', height: '75px' }}
-                        alt={`${user.username}'s profile`}
-                      />
-                    ) : (
-                      <div className="placeholder-profile" style={{ width: '75px', height: '75px', borderRadius: '50%', backgroundColor: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <FaUserCircle size={40} />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Render User Skills */}
-                  {renderSkills(user.skillsToTeach, 'Skills to Teach', true)}
-                  {renderSkills(user.skillsToLearn, 'Skills to Learn', false)}
-
-                  {/* Action Buttons */}
-                  <div className="d-flex justify-content-between mt-3">
-                    <Button
-                      variant="primary"
-                      onClick={() => navigate(`/messages/${user.userId}/${user.username}`)}
-                    >
-                      Message
-                    </Button>
-                    <OverlayTrigger placement="top" overlay={<Tooltip>Send Skill Exchange Request</Tooltip>}>
-                      <Button
-                        variant="secondary"
-                        onClick={() => console.log(`Request sent to ${user._id}`)}
-                      >
-                        Send Request
-                      </Button>
-                    </OverlayTrigger>
-                  </div>
-                </Card.Body>
-              </Card>
+            {/* Profile Picture or Placeholder */}
+            <div className="text-center mb-3">
+              {user.profilePicture ? (
+                <Image
+                  src={user.profilePicture}
+                  roundedCircle
+                  className="profile-picture"
+                  style={{ width: '75px', height: '75px' }}
+                  alt={`${user.username}'s profile`}
+                />
+              ) : (
+                <div
+                  className="placeholder-profile"
+                  style={{
+                    width: '75px',
+                    height: '75px',
+                    borderRadius: '50%',
+                    backgroundColor: '#e0e0e0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <FaUserCircle size={40} />
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-center fade-in">No matched users found.</p>
-      )}
+
+            {/* Render User Skills */}
+            {renderSkills(user.skillsToTeach, 'Skills to Teach', true)}
+            {renderSkills(user.skillsToLearn, 'Skills to Learn', false)}
+
+            {/* Message Button */}
+            <div className="d-flex justify-content-center mt-3">
+              <Button
+                variant="primary"
+                onClick={() => navigate(`/messages/${user.userId}/${user.username}`)}
+                style={{
+                  backgroundColor: '#5a67d8',
+                  borderColor: '#5a67d8',
+                  padding: '0.5rem 1.5rem',
+                  borderRadius: '50px',
+                }}
+              >
+                Message
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      </div>
+    ))}
+  </div>
+) : (
+  <p className="text-center fade-in">No matched users found.</p>
+)}
+
 
     </div>
   );
