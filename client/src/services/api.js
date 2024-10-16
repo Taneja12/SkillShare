@@ -182,9 +182,9 @@ export const createOrder = async (sessionId, userId, orderId) => {
   try {
     console.log(orderId);
     const response = await axios.post(`${API_URL}/orders/new`, {
-      sessionId :sessionId,
+      sessionId: sessionId,
       userId: userId,
-      OrderId:orderId,
+      orderId: orderId, // Correct key here (changed from OrderId to orderId)
     });
     return response.data;
   } catch (error) {
