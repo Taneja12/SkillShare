@@ -3,7 +3,7 @@ import cashfree from "./utils";
 const pay = (paymentSessionId) => {
   let checkoutOptions = {
     paymentSessionId: paymentSessionId,
-    returnUrl: "https://skill-share-deepanshu-tanejas-projects.vercel.app/orders", // Update with your return URL
+    returnUrl: "https://skill-share-deepanshu-tanejas-projects.vercel.app/success", // Update with your return URL
     notifyUrl: "https://skill-share-deepanshu-tanejas-projects.vercel.app/webhook" // Webhook endpoint
   };
 

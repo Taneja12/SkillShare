@@ -9,6 +9,7 @@ import Chat from './components/Chat';
 import Navbar from './components/Navbar';
 import VerifySkill from './components/VerifySkill';
 import SubscriptionPlans from './components/Subscription';
+import PaymentSuccess from './components/PaymentSuccess';
 
 const App = () => {
   // Get the current user's authentication status and userId from the context
@@ -39,6 +40,7 @@ const App = () => {
           element={<VerifySkill userId={currentUser?.userId} />} 
         />
         <Route path="/subscription/:userId" element={<SubscriptionPlans />} />
+        <Route path="/success" element={<PaymentSuccess />} />
 
       </Routes>
     </Router>
