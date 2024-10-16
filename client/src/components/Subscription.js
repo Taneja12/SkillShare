@@ -15,7 +15,7 @@ const SubscriptionPlans = () => {
       title: 'Monthly Plan',
       price: 49, // ₹50
       description: 'Subscribe to the monthly plan and enjoy reduced token usage.',
-      benefits: ['10 tokens per verified user', '100 tokens on signup', 'Unlimited access for 30 days'],
+      benefits: ['10 tokens per verified user', 'No Ads for 30 days'],
       duration: '1 Month',
       planType: 'monthly',
     },
@@ -23,7 +23,7 @@ const SubscriptionPlans = () => {
       title: 'Yearly Plan',
       price: 499, // ₹500
       description: 'Subscribe to the yearly plan and get the best value with more benefits.',
-      benefits: ['10 tokens per verified user', '100 tokens on signup', 'Unlimited access for 365 days'],
+      benefits: ['10 tokens per verified user', 'No Ads for 365 days'],
       duration: '1 Year',
       planType: 'yearly',
     }

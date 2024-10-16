@@ -54,6 +54,19 @@ const UserSchema = new mongoose.Schema({
     required:true,
     default: 100,
   },
+  subscriptionPlan: {
+    type: String, 
+    enum: ['monthly', 'yearly', 'none'], 
+    default: 'none', // Default to no subscription
+  },
+  subscriptionStartDate: {
+    type: Date, // Track when the subscription starts
+    default: null,
+  },
+  subscriptionEndDate: {
+    type: Date, // Track when the subscription ends
+    default: null,
+  },
   connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Users connected with
   receivedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Incoming requests
   sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Outgoing requests

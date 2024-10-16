@@ -10,6 +10,7 @@ import Navbar from './components/Navbar';
 import VerifySkill from './components/VerifySkill';
 import SubscriptionPlans from './components/Subscription';
 import PaymentSuccess from './components/PaymentSuccess';
+import Guide from './components/Guide';
 
 const App = () => {
   // Get the current user's authentication status and userId from the context
@@ -28,10 +29,10 @@ const App = () => {
         <Route 
           path="/register" 
           element={isAuthenticated ? <Navigate to="/" /> : <Register />} 
-        />
-
+        />e
         {/* Other routes */}
         <Route path="/profile/:id" element={<UserProfile />} />
+        <Route path="/Guide" element={<Guide />} />
         <Route path="/messages/:userId/:username" element={<Chat />} />
 
         {/* Pass userId as a prop to VerifySkill */}

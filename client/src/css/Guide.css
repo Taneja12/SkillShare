@@ -1,28 +1,111 @@
+/* General Guide Container */
 .guide-container {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
 }
 
-.info-card {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  border-radius: 10px;
+/* Headings */
+.guide-container h2 {
+  color: #5C63FF;
+  font-weight: bold;
   margin-bottom: 20px;
+  font-size: 2.2rem;
+  text-transform: uppercase;
 }
 
+.guide-container p {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+/* Cards Styling */
+.info-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin-bottom: 30px;
+  background-color: #ffffff;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Title */
+.info-card .card-title {
+  color: #5C63FF;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+/* Lists within Cards */
 .info-card ul {
   list-style-type: none;
   padding-left: 0;
+  margin-top: 10px;
 }
 
 .info-card li {
+  color: #343a40;
   margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.info-card li strong {
+  color: black;
+}
+
+/* Subscription Box Styling */
+.subscription-card {
+  background-color: #e9ecef;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.subscription-card p {
+  font-size: 1.2rem;
+  color: #495057;
+}
+
+.subscription-card strong {
+  color: #28a745;
+  font-size: 1.3rem;
+}
+
+.subscription-card .premium-plan {
+  color: #007bff;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.subscription-card .price {
+  color: #17a2b8;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+/* Button Styling */
+.guide-container .btn-subscribe {
+  background-color: #28a745;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  padding: 10px 20px;
+  border-radius: 50px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.guide-container .btn-subscribe:hover {
+  background-color: #218838;
 }
 
 .text-center {
   text-align: center;
-}
-
-h2 {
-  color: #333;
 }

@@ -28,9 +28,10 @@ const CustomNavbar = () => {
           {isAuthenticated ? (
             <>
               {/* Show these links if authenticated */}
-              <Nav.Link as={Link} to="/explore">Explore</Nav.Link>
-              <Nav.Link as={Link} to="/notification">Notification</Nav.Link>
-              <Nav.Link as={Link} to="/messages">Messages</Nav.Link>
+              {/* <Nav.Link as={Link} to="/explore">Explore</Nav.Link> */}
+              {/* <Nav.Link as={Link} to="/notification">Notification</Nav.Link> */}
+              {/* <Nav.Link as={Link} to="/messages">Messages</Nav.Link> */}
+              <Nav.Link as={Link} to="/guide">Guide</Nav.Link>
               <Nav.Link
                 as={Link}
                 to={{
