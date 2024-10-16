@@ -82,13 +82,13 @@ router.post('/webhook', handleWebhook);
 
 router.post('/new', async (req, res) => {
   try {
-    const { sessionId, userId, OrderId } = req.body;
-    console.log({ sessionId, userId,OrderId })
-    console.log(OrderId);
+    const { sessionId, userId, orderId } = req.body;
+    console.log({ sessionId, userId,orderId })
+    console.log(orderId);
     const order = new Order({
       sessionId,
       userId,
-      OrderId,
+      orderId,
       createdAt:moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'), // Set createdAt manually to current date/time
     });
 
