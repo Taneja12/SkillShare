@@ -12,8 +12,8 @@ const CF_SECRET_KEY = process.env.CF_SECRET_KEY;
 
 router.post('/createOrder', async (req, res) => {
   try {
-    const { orderId, orderAmount, customer_id, customerName, customerEmail, customerPhone } = req.body;
-    console.log({ orderId, orderAmount, customer_id, customerName, customerEmail, customerPhone });
+    const { OrderId, orderAmount, customer_id, customerName, customerEmail, customerPhone } = req.body;
+    console.log({ OrderId, orderAmount, customer_id, customerName, customerEmail, customerPhone });
     const orderData = {
       customer_details: {
         customer_id,
@@ -22,7 +22,7 @@ router.post('/createOrder', async (req, res) => {
       },
       order_amount: orderAmount,
       order_currency: 'INR',
-      order_id: orderId,
+      order_id: OfflineAudioCompletionEventrderId,
     };
 
     const response = await axios.post(CF_API_BASE_URL, orderData, {
