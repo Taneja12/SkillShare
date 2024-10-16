@@ -65,7 +65,7 @@ const SubscriptionPlans = () => {
   
       // Step 3: Finalize order
       try {
-        await createOrder(sessionId, userId, [{ planType: plan.planType, amount: plan.price }], orderId);
+        await createOrder(sessionId, userId, order_id);
       } catch (orderFinalizationError) {
         console.error('Error finalizing the order:', orderFinalizationError);
         throw new Error('Failed to finalize the order: Please contact support.');
