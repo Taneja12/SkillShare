@@ -14,8 +14,8 @@ exports.handleWebhook = async (req, res) => {
       return res.status(400).send('Invalid payload structure');
     }
 
-    const { order_id } = payload.data.order;
-    const { cf_payment_id, payment_status, order_amount } = payload.data.payment;
+    const { order_id, order_amount } = payload.data.order;
+    const { cf_payment_id, payment_status} = payload.data.payment;
 
     if (!order_id || !cf_payment_id || !payment_status || !order_amount) {
       console.error('Missing required fields:', payload);
