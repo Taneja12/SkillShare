@@ -35,7 +35,7 @@ const SubscriptionPlans = () => {
     setLoading(true);
   
     const orderData = {
-      OrderId: `order_${userId}_${Date.now()}`,
+      orderId: `order_${userId}_${Date.now()}`,
       orderAmount: plan.price,
       customer_id: userId,
       customerName: 'Deepanshu',
