@@ -14,7 +14,7 @@ router.get('/match/:id', async (req, res) => {
 
     // Fetch current user data
     const currentUser = await User.findById(userId).select(
-      'username skillsToTeach skillsToLearn email phoneNumber profilePicture'
+      'username skillsToTeach skillsToLearn email phoneNumber profilePicture tokens'
     );
 
     if (!currentUser) {
@@ -31,7 +31,7 @@ router.get('/match/:id', async (req, res) => {
       'skillsToTeach.skill': { $in: currentLearnSkills.map((s) => s.skill) },
       'skillsToLearn.skill': { $in: currentTeachSkills.map((s) => s.skill) },
     }).select(
-      'username skillsToTeach skillsToLearn email phoneNumber profilePicture'
+      'username skillsToTeach skillsToLearn email phoneNumber profilePicture tokens'
     );
 
     // Helper function to compare skill levels
@@ -84,7 +84,7 @@ router.get('/match/:id', async (req, res) => {
             skillsToLearn: match.skillsToLearn,
             email: match.email,
             phoneNumber: match.phoneNumber,
-            matchScore,
+            matchScore
           };
         }
         return null;
@@ -102,10 +102,10 @@ router.get('/match/:id', async (req, res) => {
         skillsToLearn: currentUser.skillsToLearn,
         email: currentUser.email,
         phoneNumber: currentUser.phoneNumber,
+        tokens:currentUser.tokens,
       },
       matchedUsers,
     };
-
     res.status(200).json(response);
   } catch (error) {
     console.error('Error fetching matches:', error);
@@ -148,7 +148,7 @@ router.put('/users/:userId/skills', async (req, res) => {
       user.skillsToTeach = skillsToTeach;
     }
     if (skillsToLearn) {
-      console.log('Hello');
+      // console.log('Hello');
       user.skillsToLearn = skillsToLearn;
     }
 
@@ -211,6 +211,21 @@ router.put('/verify-teaching-skill', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+// Route to add tokens to a user
+router.put('/add-tokens', async (req, res) => {
+  const { userId, tokens } = req.body;
+  console.log({userId, tokens});
+
+  try {
+    // Find the user by userId and increment their token count by the provided tokens amount
+    await User.findByIdAndUpdate(userId, { $inc: { tokens: tokens } });
+    res.status(200).json({ message: 'Tokens added successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add tokens' });
+  }
+});
+
 
 
 

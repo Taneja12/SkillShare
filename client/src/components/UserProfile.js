@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../Contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Spinner, Button, Image, Dropdown, Card, ProgressBar, Tooltip, OverlayTrigger } from 'react-bootstrap';
-import { FaUserCircle, FaCheckCircle, FaPen, FaUpload } from 'react-icons/fa';
+import { FaUserCircle, FaCheckCircle, FaPen, FaUpload, FaCoins } from 'react-icons/fa';
 import { fetchMatchedUsers, uploadProfilePicture, updateSkills } from '../services/api';
 import SkillsSelector from './SkillsSelector';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -27,6 +27,7 @@ const UserProfile = () => {
       if (currentUser && currentUser.userId) {
         try {
           const data = await fetchMatchedUsers(currentUser.userId);
+          console.log(data);
           setMatchedUsers(data.matchedUsers);
           setCurrentUserDetails(data.currentUser);
           setProfilePicture(data.currentUser.profilePicture);
@@ -175,11 +176,18 @@ const UserProfile = () => {
 
   return (
     <div className="container my-5 user-profile fade-in">
-      <h1 className="text-center mb-4">User Profile</h1>
 
       <Card className="shadow-lg p-4 mb-4 fade-in">
         <Card.Body>
-          <h5>User ID: {currentUser ? currentUser.userId : 'No user available'}</h5>
+
+          <div className="d-flex justify-content-between align-items-center mt-0">
+            <h5>Username: {currentUser ? currentUser.username : 'No user available'}</h5>
+            <div className="d-flex align-items-center">
+              <FaCoins size={24} className="me-2 text-warning" /> {/* Token icon */}
+              <h5>{currentUserDetails.tokens}</h5>
+            </div>
+          </div>
+
 
           <div className="profile-picture-wrapper mx-auto my-4 text-center" onClick={() => document.getElementById('fileInput').click()}>
             {uploading && (
@@ -211,7 +219,7 @@ const UserProfile = () => {
           </div>
 
           {renderSkills(currentUserDetails.skillsToTeach, 'Skills to Teach', true, true)}
-          <Button onClick={() => setShowTeachSkillsSelector(!showTeachSkillsSelector)} className="mt-2">
+          <Button onClick={() => setShowTeachSkillsSelector(!showTeachSkillsSelector)} className="mt-2 mt">
             {showTeachSkillsSelector ? 'Cancel' : 'Add Skills to Teach'}
           </Button>
           {showTeachSkillsSelector && (

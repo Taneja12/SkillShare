@@ -176,3 +176,37 @@ export const updateSkills = async (userId, updatedSkills, isTeaching) => {
     throw error; // Rethrow error to be handled by the caller
   }
 };
+
+
+export const createOrder = async (sessionId, userId, cartItems, OrderId) => {
+  try {
+    console.log(OrderId);
+    const response = await axios.post(`${API_URL}/orders/new`, {
+      sessionId,
+      userId,
+      cartItems,
+      OrderId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating order:', error);
+    throw error;
+  }
+};
+
+
+export const OrderCreation = async (orderData, token) => {
+  try {
+    const response = await axios.post(`${API_URL}/orders/createOrder`, orderData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'x-api-version': '2023-08-01',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating order:', error.response?.data || error.message);
+    throw error; // Re-throw the error to handle it further up the chain if needed
+  }
+};

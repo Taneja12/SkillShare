@@ -24,13 +24,22 @@ const CustomNavbar = () => {
         <Nav className="ml-auto">
           {/* Always show Home link */}
           <Nav.Link as={Link} to="/">Home</Nav.Link>
-          
+
           {isAuthenticated ? (
             <>
               {/* Show these links if authenticated */}
               <Nav.Link as={Link} to="/explore">Explore</Nav.Link>
               <Nav.Link as={Link} to="/notification">Notification</Nav.Link>
               <Nav.Link as={Link} to="/messages">Messages</Nav.Link>
+              <Nav.Link
+                as={Link}
+                to={{
+                  pathname: `/subscription/${currentUser?.userId}`,
+                }}
+              >
+                Subscription
+              </Nav.Link>
+
               <Nav.Link as={Link} to={`/profile/${currentUser?.userId}`}>Profile</Nav.Link>
               <Nav.Link as="button" onClick={handleLogout}>Logout</Nav.Link>
             </>

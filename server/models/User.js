@@ -49,6 +49,11 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  tokens: {
+    type: Number,
+    required:true,
+    default: 100,
+  },
   connections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Users connected with
   receivedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Incoming requests
   sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Outgoing requests

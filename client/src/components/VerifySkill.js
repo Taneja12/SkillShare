@@ -97,7 +97,8 @@ const VerifySkill = ({ userId }) => {
     if (correctAnswersCount >= 7) {
       try {
         await axios.put('https://skillshare-p28w.onrender.com/api/verify-teaching-skill', { skill, userId }); // Send skill and userId
-        alert('Teaching skill has been verified!');
+        await axios.put('https://skillshare-p28w.onrender.com/api/add-tokens', { userId, tokens: 50 });
+        alert('Teaching skill has been verified! and 50 tokens added to your Account.');
       } catch (err) {
         console.error('Failed to verify teaching skill', err);
       }

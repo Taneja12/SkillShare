@@ -9,6 +9,7 @@ const chatRoutes = require('./routes/chatRoutes');
 const requestRoutes = require('./routes/requestRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const meetRoutes = require('./routes/meetRoutes');
+const payRoutes = require('./routes/payRoutes');
 const Message = require('./models/Message');
 const User = require('./models/User');
 require('dotenv').config();
@@ -68,6 +69,7 @@ app.use('/api/chat', chatRoutes);
 // app.use('/api/request', requestRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/meet', meetRoutes);
+app.use('/api/orders', payRoutes);
 
 // Socket.IO Logic
 io.on('connection', (socket) => {
