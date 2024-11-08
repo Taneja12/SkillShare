@@ -1,5 +1,6 @@
 /* Home.css */
 
+/* Base Styles */
 .home-container {
   font-family: 'Arial', sans-serif;
   color: #333;
@@ -60,6 +61,7 @@
   background-color: #EDF2F7; /* Even Lighter Gray for Features */
 }
 
+/* Responsive Grid for Features Section */
 .features-grid {
   display: flex;
   justify-content: space-around;
@@ -107,4 +109,58 @@
 
 .call-to-action-section .btn:hover {
   background-color: #38A169;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  /* Adjust feature-item width */
+  .feature-item {
+    width: 45%; /* For tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Stack feature items vertically */
+  .features-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .feature-item {
+    width: 80%; /* Full width on smaller screens */
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cta-buttons .btn {
+    margin: 10px 0; /* Separate buttons vertically */
+    width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 60px 10px; /* Reduce padding for mobile */
+  }
+
+  .feature-item h3 {
+    font-size: 18px; /* Smaller heading font size */
+  }
+
+  .feature-item p {
+    font-size: 14px; /* Smaller paragraph font size */
+  }
+
+  .cta-buttons .btn {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+  
+  .call-to-action-section .btn {
+    font-size: 16px;
+    padding: 12px 30px;
+  }
 }
