@@ -103,6 +103,7 @@ router.get('/match/:id', async (req, res) => {
         email: currentUser.email,
         phoneNumber: currentUser.phoneNumber,
         tokens:currentUser.tokens,
+        subscriptionPlan:currentUser.subscriptionPlan,
       },
       matchedUsers,
     };

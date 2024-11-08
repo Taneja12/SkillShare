@@ -8,7 +8,7 @@ import { getChatHistory, generateGoogleMeetLink, initiateGoogleAuth } from '../s
 
 const API_URL = 'https://skillshare-p28w.onrender.com';
 
-let socket; // Move socket initialization here
+let socket;
 
 const Chat = () => {
     const { userId, username } = useParams();
@@ -20,29 +20,10 @@ const Chat = () => {
     const chatBoxRef = useRef(null);
 
     useEffect(() => {
-        // Initialize Socket.IO connection
-        socket = io(API_URL, {
-            transports: ['websocket'],
-        });
-
-        // Join the room when the user is authenticated
-        if (currentUser) {
-            socket.emit('joinRoom', currentUser.userId);
-
-            // Listen for real-time messages
-            socket.on('messageReceived', (message) => {
-                setMessages((prevMessages) => [...prevMessages, message]);
-            });
-        }
-
-        return () => {
-            socket.disconnect(); // Clean up the socket connection
-        };
-    }, [currentUser]);
-
-    useEffect(() => {
+        // Fetch messages only when Chat component mounts
         const fetchMessages = async () => {
             if (currentUser && userId) {
+                setLoading(true);
                 try {
                     const chatHistory = await getChatHistory(currentUser.userId, userId);
                     setMessages(chatHistory);
@@ -55,6 +36,20 @@ const Chat = () => {
         };
 
         fetchMessages();
+
+        // Initialize Socket.IO connection
+        socket = io(API_URL, { transports: ['websocket'] });
+        
+        if (currentUser) {
+            socket.emit('joinRoom', currentUser.userId);
+            socket.on('messageReceived', (message) => {
+                setMessages((prevMessages) => [...prevMessages, message]);
+            });
+        }
+
+        return () => {
+            socket.disconnect(); // Clean up on unmount
+        };
     }, [currentUser, userId]);
 
     const handleSendMessage = (e) => {
@@ -68,45 +63,32 @@ const Chat = () => {
             timestamp: new Date(),
         };
 
-        // Emit the message via Socket.IO
         socket.emit('sendMessage', newMessage);
-
-        // Immediately update the messages state with the new message
         setMessages((prevMessages) => [...prevMessages, newMessage]);
-
-        // Clear the message input
         setMessageContent('');
     };
 
-    // Handle redirect to Google OAuth route
-    const handleClick = () => {
-        // Redirect to the backend Google OAuth route
-        window.location.href = `${API_URL}/api/meet/google/auth`;
-    };
-
     const handleGenerateMeetLink = async () => {
-        setGeneratingLink(true); // Set generating state to true
+        setGeneratingLink(true);
         try {
-            const meetLink = await generateGoogleMeetLink(); // Call API to generate Google Meet link
+            const meetLink = await generateGoogleMeetLink();
             if (meetLink) {
-                // Send the Google Meet link as a chat message
                 const newMessage = {
                     sender: currentUser.userId,
                     receiver: userId,
-                    content: `Google Meet Link: ${meetLink}`, // Include the link in the message content
+                    content: `Google Meet Link: ${meetLink}`,
                     timestamp: new Date(),
                 };
-                socket.emit('sendMessage', newMessage); // Emit the new message
-                setMessages((prevMessages) => [...prevMessages, newMessage]); // Immediately update the messages state
+                socket.emit('sendMessage', newMessage);
+                setMessages((prevMessages) => [...prevMessages, newMessage]);
             }
         } catch (error) {
             console.error('Error generating Google Meet link:', error);
-            // Optionally, redirect to Google authentication if not authorized
             if (error.response && error.response.status === 403) {
-                initiateGoogleAuth(); // Redirect to Google auth
+                initiateGoogleAuth();
             }
         } finally {
-            setGeneratingLink(false); // Reset generating state
+            setGeneratingLink(false);
         }
     };
 
@@ -132,7 +114,6 @@ const Chat = () => {
                                         Join Meet
                                     </a>
                                 ) : (
-                                    // Use a regex to identify any URLs in the message content and make them clickable
                                     msg.content.split(' ').map((word, index) =>
                                         word.match(/https?:\/\/[^\s]+/g) ? (
                                             <a key={index} href={word} target="_blank" rel="noopener noreferrer">
@@ -154,7 +135,6 @@ const Chat = () => {
                 )}
             </div>
 
-
             <form onSubmit={handleSendMessage} className="d-flex mt-3">
                 <input
                     type="text"
@@ -167,9 +147,8 @@ const Chat = () => {
                 <button type="submit" className="btn btn-primary">Send</button>
             </form>
 
-            {/* Button to generate Google Meet link */}
             <div className="mt-3">
-                <button onClick={handleClick} className="btn btn-secondary" disabled={generatingLink}>
+                <button onClick={handleGenerateMeetLink} className="btn btn-secondary" disabled={generatingLink}>
                     {generatingLink ? 'Generating...' : 'Generate Google Meet Link'}
                 </button>
             </div>

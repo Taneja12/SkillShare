@@ -259,7 +259,7 @@ const UserProfile = () => {
           <Card.Body>
             {/* User Title */}
             <h5 className="user-title">{user.username}</h5>
-
+          <h1>{user.subscriptionPlan}</h1>
             {/* Profile Picture or Placeholder */}
             <div className="text-center mb-3">
               {user.profilePicture ? (
