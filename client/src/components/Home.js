@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../Contexts/AuthContext'; // Import the custom hook for auth context
 import '../css/Home.css'; // Optional: for styling
 
-const Home = () => {
+const Home = ({ userId }) => {
   const { isAuthenticated } = useAuth(); // Get auth state from context
 
   return (
@@ -23,7 +23,7 @@ const Home = () => {
             </>
           )}
           {isAuthenticated && (
-            <Link to="/profile/:userid" className="btn btn-primary">Go to Profile</Link>
+        <Link to={`/profile/${userId}`} className="btn btn-primary">Go to Profile</Link>
           )}
         </div>
       </header>

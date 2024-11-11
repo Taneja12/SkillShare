@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../Contexts/AuthContext';
@@ -124,24 +125,19 @@ const Chat = () => {
             <div className="chat-box border p-3 rounded" style={{ maxHeight: '400px', overflowY: 'auto' }} ref={chatBoxRef}>
                 {messages.length > 0 ? (
                     messages.map((msg) => (
-                        <div key={msg._id} className={`chat-message ${msg.sender === currentUser.userId ? 'my-message' : 'other-message'}`}>
+                        <div
+                            key={msg._id}
+                            className={`chat-message ${msg.sender === currentUser.userId ? 'my-message' : 'other-message'}`}
+                        >
                             <div className="chat-bubble">
-                                <strong>{msg.sender === currentUser.userId ? 'You' : msg.senderUsername}</strong>
-                                : {msg.content.includes('Google Meet Link') ? (
-                                    <a href={msg.content.match(/https?:\/\/[^\s]+/g)} target="_blank" rel="noopener noreferrer">
+                                <strong>{msg.sender === currentUser.userId ? 'You' : msg.senderUsername}</strong>:
+                                {msg.content.includes('https://meet.google.com/') ? (
+                                    // Detect if the message contains a Google Meet link and wrap it as a clickable link
+                                    <a href={msg.content} target="_blank" rel="noopener noreferrer" className="text-primary">
                                         Join Meet
                                     </a>
                                 ) : (
-                                    // Use a regex to identify any URLs in the message content and make them clickable
-                                    msg.content.split(' ').map((word, index) =>
-                                        word.match(/https?:\/\/[^\s]+/g) ? (
-                                            <a key={index} href={word} target="_blank" rel="noopener noreferrer">
-                                                {word}
-                                            </a>
-                                        ) : (
-                                            <span key={index}>{word} </span>
-                                        )
-                                    )
+                                    msg.content
                                 )}
                                 <small className="text-muted d-block">
                                     {new Date(msg.timestamp).toLocaleString()}
@@ -152,6 +148,7 @@ const Chat = () => {
                 ) : (
                     <p className="text-center text-muted">No messages yet.</p>
                 )}
+
             </div>
 
 
@@ -178,3 +175,4 @@ const Chat = () => {
 };
 
 export default Chat;
+

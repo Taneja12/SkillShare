@@ -14,7 +14,7 @@ router.get('/match/:id', async (req, res) => {
 
     // Fetch current user data
     const currentUser = await User.findById(userId).select(
-      'username skillsToTeach skillsToLearn email phoneNumber profilePicture tokens'
+      'username skillsToTeach skillsToLearn email phoneNumber profilePicture tokens connections'
     );
 
     if (!currentUser) {
@@ -104,6 +104,7 @@ router.get('/match/:id', async (req, res) => {
         phoneNumber: currentUser.phoneNumber,
         tokens:currentUser.tokens,
         subscriptionPlan:currentUser.subscriptionPlan,
+        connections:currentUser.connections,
       },
       matchedUsers,
     };
@@ -120,7 +121,7 @@ const validSkillLevels = ['beginner', 'intermediate', 'expert'];
 router.put('/users/:userId/skills', async (req, res) => {
   const { userId } = req.params;
   const { skillsToTeach, skillsToLearn } = req.body;
-  console.log({ skillsToTeach, skillsToLearn });
+  // console.log({ skillsToTeach, skillsToLearn });
   try {
     // Validate skill levels on the server side
     const validateSkills = (skills, field) => {

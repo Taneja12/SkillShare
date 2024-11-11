@@ -66,7 +66,7 @@ connectDB();
 app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/chat', chatRoutes);
-// app.use('/api/request', requestRoutes);
+app.use('/api/request', requestRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/meet', meetRoutes);
 app.use('/api/orders', payRoutes);

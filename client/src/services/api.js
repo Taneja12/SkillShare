@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Update the backend URL to the Render deployment
-const API_URL = 'https://skillshare-p28w.onrender.com/api';
+// const API_URL = 'https://skillshare-p28w.onrender.com/api';
+const API_URL = 'http://localhost:5000/api';
 
 export const registerUser = async (userData) => {
   try {
@@ -87,7 +88,7 @@ export const googleLoginUser = async ({ token }) => {
 // Fetch chat history
 export const getChatHistory = async (currentUserId, userId) => {
   try {
-    console.log(userId);
+    // console.log(userId);
     const response = await axios.get(`${API_URL}/chat/history/${currentUserId}/${userId}`);
     return response.data;
   } catch (error) {
@@ -206,5 +207,56 @@ export const OrderCreation = async (orderData, token) => {
   } catch (error) {
     console.error('Error creating order:', error.response?.data || error.message);
     throw error; // Re-throw the error to handle it further up the chain if needed
+  }
+};
+
+
+export const sendRequesttoFriend = async (currentUserId, requestId) => {
+  try{
+    const response = await axios.post(`${API_URL}/request/send-request`,{currentUserId,requestId});
+    return response.data;
+  }catch(error){
+    console.log('Error sending Request');
+    throw error;
+  }
+};
+
+export const fetchReceivedRequests = async (userId) => {
+  try {
+    const res = await axios.get(`${API_URL}/request/received/${userId}`);
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching received requests:', error);
+    throw error;
+  }
+};
+
+// Accept request
+export const acceptRequest = async (senderId, receiverId) => {
+  try {
+    await axios.post(`${API_URL}/request/accept`, { senderId, receiverId });
+  } catch (error) {
+    console.error('Error accepting request:', error);
+    throw error;
+  }
+};
+
+// Decline request
+export const declineRequest = async (senderId, receiverId) => {
+  try {
+    await axios.post(`${API_URL}/request/decline`, { senderId, receiverId });
+  } catch (error) {
+    console.error('Error declining request:', error);
+    throw error;
+  }
+};
+
+export const fetchConnections = async (userId) => {
+  try {
+    const response = await axios.get(`${API_URL}/request/connections/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching connections:', error);
+    throw error;
   }
 };

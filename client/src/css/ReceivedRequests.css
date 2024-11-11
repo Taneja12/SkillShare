@@ -1,0 +1,58 @@
+.requests-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.request-row {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 15px;
+  object-fit: cover;
+}
+
+.request-info {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.username {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.actions button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #4caf50;
+  color: white;
+}
+
+.actions button:last-child {
+  background-color: #f44336;
+}
+
+.actions button:hover {
+  opacity: 0.9;
+}

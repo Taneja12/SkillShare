@@ -41,6 +41,9 @@ const CustomNavbar = () => {
                 Subscription
               </Nav.Link>
 
+
+              <Nav.Link as={Link} to={`/explore`}>Explore</Nav.Link>
+              <Nav.Link as={Link} to={`/messenger`}>Message</Nav.Link>
               <Nav.Link as={Link} to={`/profile/${currentUser?.userId}`}>Profile</Nav.Link>
               <Nav.Link as="button" onClick={handleLogout}>Logout</Nav.Link>
             </>

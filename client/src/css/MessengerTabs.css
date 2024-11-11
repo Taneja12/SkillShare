@@ -1,0 +1,33 @@
+.tabs-col {
+  border-right: 1px solid #ddd;
+}
+
+.tab-content-col {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-box {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+form {
+  display: flex;
+  gap: 10px;
+}
+
+form input {
+  flex: 1;
+}

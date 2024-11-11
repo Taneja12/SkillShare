@@ -99,13 +99,13 @@ const Login = () => {
 
   return (
     <div className="container d-flex justify-content-center align-items-center my-5" style={containerStyle}>
-      <div className="col-md-4">
-        <div className="card p-4 shadow-sm" style={cardStyle}>
+      <div className="col-md-6 col-lg-4 col-xl-3">
+        <div className="card p-4 shadow-sm" style={{ ...cardStyle, width: '100%' }}        >
           <h2 className="text-center mb-4">Login</h2>
 
           {/* Add the image for better visual appeal */}
           <div className="text-center mb-4">
-            <img src={loginImage} alt="Login Illustration" className="img-fluid" style={{ maxHeight: '200px' }} />
+            <img src={loginImage} alt="Login Illustration" className="img-fluid" style={{ maxWidth: '100%', height: 'auto' }} />
           </div>
 
           {/* Display error dynamically */}
@@ -146,7 +146,8 @@ const Login = () => {
               type="submit"
               className="btn w-100"
               disabled={loading}
-              style={{buttonStyle, backgroundColor:'#79a7ac'}}
+              style={{ ...buttonStyle, backgroundColor: '#79a7ac' }}
+
 
             >
               {loading ? 'Logging in...' : 'Login'}
